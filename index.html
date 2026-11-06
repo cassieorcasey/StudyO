@@ -40,7 +40,7 @@
     color-scheme: dark;
   }
   * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
+  html { -webkit-text-size-adjust: 100%; overflow-x: hidden; }
   body {
     margin: 0; min-height: 100vh; background: var(--page); color: var(--ink);
     font-family: "SF Pro Text", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI Variable Text", "Segoe UI", Inter, Helvetica, Arial, sans-serif;
@@ -85,7 +85,7 @@
     padding: 24px max(16px, env(safe-area-inset-right)) max(32px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
   }
   .grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
-  .card { background: var(--card); border-radius: 22px; padding: 28px 24px; min-width: 0; }
+  .card { background: var(--card); border-radius: 22px; padding: 28px 24px; min-width: 0; overflow: hidden; }
   .eyebrow { font-size: 14px; font-weight: 600; color: var(--soft); letter-spacing: -0.016em; margin: 0 0 4px; }
   h2 { font-size: 28px; line-height: 1.14; font-weight: 600; letter-spacing: 0.007em; margin: 0 0 16px; }
   h3 { font-size: 19px; font-weight: 600; letter-spacing: 0.012em; margin: 0 0 12px; }
@@ -192,16 +192,16 @@
   svg.chart text { fill: var(--faint); font-size: 13px; font-family: inherit; letter-spacing: 0; }
   svg.chart .grid line { stroke: var(--line); }
 
-  .heat { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 1fr); gap: 3px; }
-  .heat i { aspect-ratio: 1; border-radius: 3px; background: var(--heat0); display: block; }
-  .l1 { background: color-mix(in srgb, var(--accent) 28%, var(--heat0)); }
-  .l2 { background: color-mix(in srgb, var(--accent) 52%, var(--heat0)); }
-  .l3 { background: color-mix(in srgb, var(--accent) 76%, var(--heat0)); }
-  .l4 { background: var(--accent); }
+  .heat { display: grid; grid-auto-flow: column; grid-template-columns: repeat(16, minmax(0, 1fr)); grid-template-rows: repeat(7, auto); gap: 3px; min-width: 0; }
+  .heat i { width: 100%; aspect-ratio: 1 / 1; border-radius: 3px; background: var(--heat0); display: block; min-width: 0; }
+  .l1, .heat i.l1 { background: color-mix(in srgb, var(--accent) 28%, var(--heat0)); }
+  .l2, .heat i.l2 { background: color-mix(in srgb, var(--accent) 52%, var(--heat0)); }
+  .l3, .heat i.l3 { background: color-mix(in srgb, var(--accent) 76%, var(--heat0)); }
+  .l4, .heat i.l4 { background: var(--accent); }
   .heat i.fut { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
   .heat i.today { outline: 1.5px solid var(--ink); outline-offset: 0; }
-  .heatwrap { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px; }
-  .heatdays { display: grid; grid-template-rows: repeat(7, 1fr); gap: 3px; font-size: 10px; color: var(--faint); }
+  .heatwrap { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px; align-items: stretch; min-width: 0; }
+  .heatdays { display: grid; grid-template-rows: repeat(7, minmax(0, 1fr)); gap: 3px; font-size: 10px; color: var(--faint); }
   .heatdays span { display: flex; align-items: center; }
   .heatlegend { display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-size: 12px; color: var(--faint); margin-top: 10px; }
   .heatlegend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
@@ -257,6 +257,10 @@
     .tilecard .v { font-size: 26px; }
     .pnav span { min-width: 112px; font-size: 14px; }
   }
+
+  .modes { margin-bottom: 18px; }
+  .modes button { padding: 6px 16px; font-size: 14px; }
+  .modes button:disabled { opacity: .45; }
 
   /* ---------- Tab Kategori ---------- */
   .katHint { margin-top: 0; }
@@ -331,12 +335,10 @@
       <span class="tile" aria-hidden="true"><svg viewBox="0 0 1024 1024"><defs><mask id="lgcut2" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"><rect width="1024" height="1024" fill="#fff"/><path transform="rotate(18 802 440)" d="M786 172A16 16 0 0 1 818 172V650L802 722L786 650Z" fill="#000" stroke="#000" stroke-width="40" stroke-linejoin="round"/></mask></defs><g transform="translate(512 512) scale(0.98) translate(-512 -512)"><g transform="translate(512 512) rotate(-12) scale(0.7) translate(-512 -450)"><g mask="url(#lgcut2)" fill="none" stroke="#1d1d1f" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"><rect x="120" y="272" width="392" height="480" rx="64"/><rect x="512" y="272" width="392" height="480" rx="64"/><path d="M192 408H440M192 508H440M192 608H440"/><path d="M584 408H664M584 508H648M584 608H616"/></g><path transform="rotate(18 802 440)" d="M786 172A16 16 0 0 1 818 172V650L802 722L786 650Z" fill="#1d1d1f"/></g></g></svg></span>
       <b>StudyIng</b>
     </div>
-    <nav class="tabs" role="tablist" aria-label="Mode">
-      <button id="tabSw" role="tab" aria-selected="true">Stopwatch</button>
-      <button id="tabCd" role="tab" aria-selected="false">Hitung mundur</button>
-      <button id="tabCat" role="tab" aria-selected="false">Break</button>
-      <button id="tabSt" role="tab" aria-selected="false">Statistik</button>
+    <nav class="tabs" role="tablist" aria-label="Halaman">
+      <button id="tabTimer" role="tab" aria-selected="true">Timer</button>
       <button id="tabKat" role="tab" aria-selected="false">Kategori</button>
+      <button id="tabSt" role="tab" aria-selected="false">Statistik</button>
     </nav>
     <button class="acct" id="acct">Masuk</button>
   </div>
@@ -346,7 +348,13 @@
   <!-- ============ Timer (3 mode) ============ -->
   <section id="viewTimer" class="grid two">
     <div class="card timer" id="app">
+      <div class="seg modes" role="group" aria-label="Mode timer">
+        <button id="mSw" aria-pressed="true">Stopwatch</button>
+        <button id="mCd" aria-pressed="false">Countdown</button>
+        <button id="mBr" aria-pressed="false">Break</button>
+      </div>
       <div class="chips" id="chips"></div>
+      <p class="empty" id="noCats" hidden></p>
       <div class="picker" id="picker" hidden>
         <input id="hours" type="text" inputmode="numeric" maxlength="2" value="1" aria-label="Jam"><span>jam</span>
         <input id="mins" type="text" inputmode="numeric" maxlength="2" value="0" aria-label="Menit"><span>menit</span>
@@ -579,14 +587,16 @@
 
   /* ---------- Elemen ---------- */
   const app = $('app'), timeEl = $('time'), statusEl = $('status'), toggleBtn = $('toggle'), resetBtn = $('reset');
-  const tabs = { stopwatch: $('tabSw'), countdown: $('tabCd'), category: $('tabCat'), stats: $('tabSt'), cats: $('tabKat') };
+  const tabs = { timer: $('tabTimer'), cats: $('tabKat'), stats: $('tabSt') };
+  const modeBtns = { stopwatch: $('mSw'), countdown: $('mCd'), category: $('mBr') };
+  let view = 'timer';
   const hoursEl = $('hours'), minsEl = $('mins');
   let mode = 'stopwatch';
   let runBefore = 0, cdLimit = 0, finished = false;   // akumulasi per putaran stopwatch/hitung mundur
   const running = () => !!S.active;
   const runElapsed = () => runBefore + (S.active ? Date.now() - S.active.start : 0);
 
-  function setLock(on) { Object.values(tabs).forEach(t => t.disabled = on); hoursEl.disabled = minsEl.disabled = on || (mode === 'countdown' && runBefore > 0); }
+  function setLock(on) { Object.values(modeBtns).forEach(t => t.disabled = on); hoursEl.disabled = minsEl.disabled = on || (mode === 'countdown' && runBefore > 0); }
   function readLimit() { cdLimit = Math.max(60, ((parseInt(hoursEl.value, 10) || 0) * 3600 + (parseInt(minsEl.value, 10) || 0) * 60)) * 1000; }
 
   let beforeStartHook = null, starting = false;
@@ -628,12 +638,28 @@
 
   /* ---------- Render timer ---------- */
   let chipSig = '';
+  // Break = kategori istirahat; Stopwatch & Countdown = kategori belajar/diabaikan
+  const groupOf = c => c && c.type === 'rest' ? 'rest' : 'work';
+  const modeGroup = () => mode === 'category' ? 'rest' : 'work';
+  const groupCats = () => S.cats.filter(c => groupOf(c) === modeGroup());
+  function fixSel() {
+    if (running()) return;
+    const g = modeGroup(), list = groupCats();
+    if (!S.selBy) S.selBy = {};
+    if (cat(S.sel) && groupOf(cat(S.sel)) === g) { S.selBy[g] = S.sel; return; }
+    const keep = list.find(c => c.id === S.selBy[g]) || list[0];
+    if (keep) { S.sel = keep.id; S.selBy[g] = keep.id; }
+  }
   function renderChips() {
-    const sig = S.cats.map(k => k.id + k.name + k.color + k.type).join('~') + S.sel;
+    const list = groupCats();
+    const sig = list.map(k => k.id + k.name + k.color).join('~') + S.sel + mode;
     if (sig === chipSig) return;
     chipSig = sig;
     const box = $('chips'); box.textContent = '';
-    S.cats.filter(k => k.type !== 'ignore' || true).forEach(k => {
+    const none = $('noCats');
+    none.hidden = list.length > 0;
+    none.textContent = mode === 'category' ? 'Belum ada kategori Istirahat. Tambahkan di tab Kategori.' : 'Belum ada kategori Belajar. Tambahkan di tab Kategori.';
+    list.forEach(k => {
       const b = el('button', { className: 'chip' + (k.id === S.sel ? ' on' : ''), title: k.type === 'study' ? 'Belajar' : k.type === 'rest' ? 'Istirahat' : 'Diabaikan' }, [dotEl(k.color), k.name]);
       b.onclick = () => {
         if (k.id === S.sel) return;
@@ -648,12 +674,15 @@
   }
 
   function render() {
-    if (mode === 'stats') return renderStats();
-    if (mode === 'cats') return;
+    if (view === 'stats') return renderStats();
+    if (view === 'cats') return;
+    fixSel();
     renderChips();
+    const empty = !groupCats().length && !running();
+    toggleBtn.disabled = empty || starting;
     const now = Date.now(), today = dayKey(now);
     const days = perDay(withActive()), t = split(days[today]);
-    const c = cat(S.sel);
+    const c = cat(S.sel) || S.cats[0];
     let clock, status, over = false;
 
     if (mode === 'category') {
@@ -730,6 +759,7 @@
         el('option', { value: 'study', textContent: 'Belajar' }), el('option', { value: 'rest', textContent: 'Istirahat' }), el('option', { value: 'ignore', textContent: 'Diabaikan' })
       ]);
       ty.value = k.type;
+      ty.disabled = !!(S.active && S.active.cat === k.id);   // jenis kategori yang sedang berjalan tidak bisa diubah
       const lm = el('input', { type: 'number', value: k.limit || 0, min: 0, max: 1440, inputMode: 'numeric' });
       lm.oninput = function () { const v = parseInt(this.value, 10); k.limit = isNaN(v) || v < 0 ? 0 : v; save(); render(); };
       const cb = el('input', { type: 'checkbox', checked: !!k.cd });
@@ -1045,7 +1075,7 @@
     } finally {
       syncing = false; saveLocal();
       const ae = document.activeElement;
-      if (!(mode === 'stats' && ae && ae.closest && ae.closest('.hist, details'))) render();
+      if (!(view === 'stats' && ae && ae.closest && ae.closest('.hist, details'))) render();
       renderSetIfIdle();
       if (again) { again = false; Sync.schedule(400); }
     }
@@ -1377,33 +1407,42 @@
   };
 
   /* ---------- Mode dan event ---------- */
-  function setMode(next) {
-    stopBeepSpam();
-    mode = next;
+  // Halaman (tab atas): tidak mengganggu timer yang sedang berjalan
+  function setView(next) {
+    view = next;
     for (const m in tabs) tabs[m].setAttribute('aria-selected', String(m === next));
-    const timerView = next !== 'stats' && next !== 'cats';
-    $('viewTimer').hidden = !timerView;
+    $('viewTimer').hidden = next !== 'timer';
     $('viewStats').hidden = next !== 'stats';
     $('viewCats').hidden = next !== 'cats';
+    if (next === 'stats') { if (!running()) document.title = DEF_TITLE; anim = true; }
+    if (next === 'cats') renderSet();
+    chipSig = '';
+    render();
+    play($('view' + (next === 'timer' ? 'Timer' : next === 'stats' ? 'Stats' : 'Cats')), 'enter');
+  }
+  // Mode timer: Stopwatch / Countdown / Break (terkunci saat timer berjalan)
+  function setMode(next, keepRun) {
+    stopBeepSpam();
+    mode = next;
+    for (const m in modeBtns) modeBtns[m].setAttribute('aria-pressed', String(m === next));
     $('picker').hidden = next !== 'countdown';
     resetBtn.hidden = next === 'category';
-    if (timerView) { runBefore = 0; finished = false; readLimit(); setLock(running()); }
-    else if (next === 'stats') { document.title = DEF_TITLE; anim = true; }
-    else { document.title = DEF_TITLE; renderSet(); }
+    if (!keepRun) { runBefore = 0; finished = false; }
+    readLimit(); setLock(running());
+    chipSig = '';
     render();
-    if (timerView) play($('viewTimer'), 'enter');
-    else if (next === 'cats') play($('viewCats'), 'enter');
   }
 
   toggleBtn.onclick = toggle;
   resetBtn.onclick = reset;
   $('warnKeep').onclick = () => { if (S.active) { S.active.ok = true; save(); } render(); };
   $('warnCut').onclick = () => { if (S.active) { endSession(S.active.start + S.set.maxH * H); runBefore = 0; setLock(false); } render(); };
-  tabs.stopwatch.onclick = () => setMode('stopwatch');
-  tabs.countdown.onclick = () => setMode('countdown');
-  tabs.category.onclick = () => setMode('category');
-  tabs.stats.onclick = () => setMode('stats');
-  tabs.cats.onclick = () => setMode('cats');
+  tabs.timer.onclick = () => setView('timer');
+  tabs.cats.onclick = () => setView('cats');
+  tabs.stats.onclick = () => setView('stats');
+  modeBtns.stopwatch.onclick = () => setMode('stopwatch');
+  modeBtns.countdown.onclick = () => setMode('countdown');
+  modeBtns.category.onclick = () => setMode('category');
   $('perW').onclick = () => { anim = true; per = 'week'; offset = 0; renderStats(); };
   $('perM').onclick = () => { anim = true; per = 'month'; offset = 0; renderStats(); };
   $('prev').onclick = () => { anim = true; offset--; renderStats(); };
@@ -1418,14 +1457,17 @@
   // Sesi yang masih aktif dari kunjungan sebelumnya dilanjutkan (waktu tetap dihitung).
   let lastStatsDay = dayKey(Date.now());
   setInterval(() => {
-    if (mode === 'cats') return;
-    if (mode !== 'stats') render();
+    if (view === 'cats') { if (running()) document.title = fmtHMS(Date.now() - S.active.start) + ' · ' + ((cat(S.active.cat) || {}).name || ''); return; }
+    if (view !== 'stats') render();
     else if (S.active || dayKey(Date.now()) !== lastStatsDay) { lastStatsDay = dayKey(Date.now()); if (!document.activeElement || !document.activeElement.closest('.hist, details')) renderStats(); }
   }, 250);
 
   readLimit();
   renderSet();
-  setMode(S.active ? 'category' : 'stopwatch');
+  // Sesi aktif dari kunjungan sebelumnya: buka mode yang sesuai jenis kategorinya
+  setMode(S.active && groupOf(cat(S.active.cat)) === 'rest' ? 'category' : 'stopwatch');
+  if (S.active && groupOf(cat(S.active.cat)) !== 'rest') runBefore = 0;
+  setView('timer');
 })();
 </script>
 </body>
