@@ -531,6 +531,10 @@
   if (!S || S.v !== 2 || !S.cats || !S.cats.length) S = JSON.parse(JSON.stringify(DEFAULT));
   S.set = Object.assign({}, DEFAULT.set, S.set);
   const cat = id => S.cats.find(c => c.id === id) || null;
+  // Kategori yang dihapus tetap diingat (nama, warna, jenis), supaya riwayatnya tetap dihitung di statistik.
+  if (!S.gone || typeof S.gone !== 'object') S.gone = {};
+  const info = id => cat(id) || S.gone[id] || null;
+  const bury = c => { if (c && c.id) S.gone[c.id] = { id: c.id, name: c.name, color: c.color, type: c.type, limit: 0 }; };
   if (!cat(S.sel)) S.sel = S.cats[0].id;
   if (S.active && !cat(S.active.cat)) S.active = null;
   let syncHook = null;
@@ -560,7 +564,7 @@
   const withActive = () => S.active ? S.sessions.concat([{ cat: S.active.cat, start: S.active.start, end: Date.now() }]) : S.sessions;
   function split(dayMap) {   // { study, rest, by }
     let study = 0, rest = 0;
-    for (const id in dayMap || {}) { const c = cat(id); if (!c) continue; if (c.type === 'study') study += dayMap[id]; else if (c.type === 'rest') rest += dayMap[id]; }
+    for (const id in dayMap || {}) { const c = info(id); if (!c) continue; if (c.type === 'study') study += dayMap[id]; else if (c.type === 'rest') rest += dayMap[id]; }
     return { study, rest, by: dayMap || {} };
   }
 
@@ -743,6 +747,14 @@
         el('b', { textContent: fmtDur(ms) + lab })
       ]));
     });
+    Object.keys(t.by).forEach(id => {
+      const g = !cat(id) && S.gone[id];
+      if (!g || !t.by[id] || g.type === 'ignore') return;
+      rows.appendChild(el('div', { className: 'row' }, [
+        el('span', {}, [dotEl(g.color), g.name, el('span', { className: 'tag', textContent: (g.type === 'study' ? 'belajar' : 'istirahat') + ' · dihapus' })]),
+        el('b', { textContent: fmtDur(t.by[id]) })
+      ]));
+    });
   }
 
   /* ---------- Pengaturan kategori ---------- */
@@ -756,7 +768,7 @@
       const del = el('button', { className: 'sm', textContent: '✕', title: 'Hapus kategori', disabled: S.cats.length < 2 || (S.active && S.active.cat === k.id) });
       del.onclick = () => {
         if (!confirmDel(k)) return;
-        S.cats = S.cats.filter(z => z !== k);
+        bury(k); S.cats = S.cats.filter(z => z !== k);
         if (S.sel === k.id) S.sel = S.cats[0].id;
         save(); renderSet(); render();
       };
@@ -945,7 +957,8 @@
 
   function renderTopics(byCat, nDays, sumR) {
     const box = $('topics'); box.textContent = '';
-    const study = S.cats.filter(c => c.type === 'study');
+    const study = S.cats.filter(c => c.type === 'study')
+      .concat(Object.values(S.gone).filter(g => g.type === 'study' && !cat(g.id) && byCat[g.id] > 0).map(g => Object.assign({}, g, { name: g.name + ' (dihapus)' })));
     if (!study.length) { box.appendChild(el('p', { className: 'empty', textContent: 'Belum ada kategori bertanda Belajar. Atur di tab Break.' })); return; }
     study.slice().sort((a, b) => (byCat[b.id] || 0) - (byCat[a.id] || 0)).forEach(c => {
       const ms = byCat[c.id] || 0, tgt = (c.limit || 0) * M * nDays;
@@ -978,7 +991,7 @@
       const d = new Date(s.start + TZ);
       const when = HARI[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + BLN[d.getUTCMonth()] + ' · ' + pad(d.getUTCHours()) + '.' + pad(d.getUTCMinutes());
       const sel = el('select', { title: 'Kategori' }, S.cats.map(c => el('option', { value: c.id, textContent: c.name })));
-      if (!cat(s.cat)) sel.appendChild(el('option', { value: s.cat, textContent: '(dihapus)' }));
+      if (!cat(s.cat)) sel.appendChild(el('option', { value: s.cat, textContent: (S.gone[s.cat] ? S.gone[s.cat].name + ' ' : '') + '(dihapus)' }));
       sel.value = s.cat;
       sel.onchange = function () { s.cat = this.value; save(); renderStats(); };
       const dur = el('input', { type: 'number', min: 1, max: 1440, value: Math.max(1, Math.round((s.end - s.start) / M)), title: 'Durasi (menit)', inputMode: 'numeric' });
@@ -1105,6 +1118,12 @@
     //    untuk kategori dan pengaturan (supaya kategori bawaan tidak menimpa).
     const [ps, pc, pz] = await Promise.all([pullTable('settings'), pullTable('categories'), pullTable('sessions')]);
 
+    if (!S.sync.gone1) {
+      const old = must(await sb.from('categories').select('*').eq('deleted', true)) || [];
+      old.forEach(r => { if (!cat(r.id)) bury({ id: r.id, name: r.name, color: r.color, type: r.type }); });
+      S.sync.gone1 = true;
+    }
+
     if (ps.data.length) {
       const r = ps.data[0];
       if (first || hsh(rowSet()) === H_.set) {
@@ -1123,9 +1142,11 @@
       const pendingDel = !loc && H_.c[r.id] != null && !first;
       if (dirty || pendingDel) return;
       if (r.deleted) {
+        bury({ id: r.id, name: r.name, color: r.color, type: r.type });
         if (loc && !(S.active && S.active.cat === r.id)) { S.cats.splice(idx, 1); changedNow = true; }
         delete H_.c[r.id]; return;
       }
+      delete S.gone[r.id];
       const nc = { id: r.id, name: r.name, color: r.color, type: r.type, limit: r.limit_min, cd: !!r.countdown, sort: r.sort };
       if (loc) Object.assign(loc, nc); else S.cats.push(nc);
       applied.add(r.id); changedNow = true;
