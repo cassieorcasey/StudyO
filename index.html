@@ -504,7 +504,13 @@
     (kids || []).forEach(c => c != null && e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c));
     return e;
   }
-  function play(node, cls) { if (!node) return; node.classList.remove(cls); void node.offsetWidth; node.classList.add(cls); }
+  function play(node, cls) {
+    if (!node) return;
+    clearTimeout(node['_t' + cls]);
+    node.classList.remove(cls); void node.offsetWidth; node.classList.add(cls);
+    // Lepas kelas animasi setelah selesai, supaya render ulang berkala tidak memutar animasinya lagi.
+    node['_t' + cls] = setTimeout(() => node.classList.remove(cls), 1200);
+  }
   let anim = false;
   const dotEl = c => { const d = el('span', { className: 'dot' }); d.style.background = c; return d; };
 
@@ -1454,11 +1460,11 @@
   window.addEventListener('pagehide', saveLocal);
 
   // Sesi yang masih aktif dari kunjungan sebelumnya dilanjutkan (waktu tetap dihitung).
-  let lastStatsDay = dayKey(Date.now());
+  let lastStatsDay = dayKey(Date.now()), lastStatsAt = 0;
   setInterval(() => {
     if (view === 'cats') { if (running()) document.title = fmtHMS(Date.now() - S.active.start) + ' · ' + ((cat(S.active.cat) || {}).name || ''); return; }
     if (view !== 'stats') render();
-    else if (S.active || dayKey(Date.now()) !== lastStatsDay) { lastStatsDay = dayKey(Date.now()); if (!document.activeElement || !document.activeElement.closest('.hist, details')) renderStats(); }
+    else if ((S.active && Date.now() - lastStatsAt > 5000) || dayKey(Date.now()) !== lastStatsDay) { lastStatsAt = Date.now(); lastStatsDay = dayKey(Date.now()); if (!document.activeElement || !document.activeElement.closest('.hist, details')) renderStats(); }
   }, 250);
 
   readLimit();
