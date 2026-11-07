@@ -16,7 +16,7 @@
     --page: #f5f5f7; --card: #ffffff; --ink: #1d1d1f; --soft: #6e6e73; --faint: #86868b;
     --seg: #e8e8ed; --seg-on: #ffffff; --nav: rgba(251,251,253,0.8);
     --accent: #0071e3; --accent-hover: #0077ed; --accent-ink: #ffffff;
-    --rest: #a1a1a6; --line: rgba(0,0,0,0.1); --warn: #bf4800;
+    --rest: #a1a1a6; --line: rgba(0,0,0,0.1); --warn: #bf4800; --danger: #d70015; --danger-bg: rgba(215,0,21,.09);
     --heat0: #ebebf0;
     color-scheme: light;
   }
@@ -26,6 +26,7 @@
       --seg: #2c2c2e; --seg-on: #636366; --nav: rgba(22,22,23,0.8);
       --accent: #2997ff; --accent-hover: #4aa8ff; --accent-ink: #000000;
       --rest: #6e6e73; --line: rgba(255,255,255,0.14); --warn: #ff9f0a;
+      --danger: #ff6961; --danger-bg: rgba(255,105,97,.16);
       --heat0: #2c2c2e;
       color-scheme: dark;
     }
@@ -35,6 +36,7 @@
     --seg: #2c2c2e; --seg-on: #636366; --nav: rgba(22,22,23,0.8);
     --accent: #2997ff; --accent-hover: #4aa8ff; --accent-ink: #000000;
     --rest: #6e6e73; --line: rgba(255,255,255,0.14); --warn: #ff9f0a;
+    --danger: #ff6961; --danger-bg: rgba(255,105,97,.16);
     --heat0: #2c2c2e;
     color-scheme: dark;
   }
@@ -98,13 +100,30 @@
     transition: background .2s, color .2s;
   }
   .chip.on { background: var(--ink); color: var(--page); }
+  /* Pill topik dengan menu pilihan (▾) */
+  .topicsel { position: relative; display: inline-block; }
+  .tpill { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px 0 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--seg); color: var(--ink); font-size: 15px; font-weight: 500; max-width: 100%; }
+  .tpill .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 46vw; }
+  .tpill .car { color: var(--soft); font-size: 12px; transition: transform .2s; }
+  .tpill[aria-expanded="true"] .car { transform: rotate(180deg); }
+  .tpill:not(:disabled):hover { background: var(--seg-on); }
+  .tmenu { position: absolute; left: 50%; top: calc(100% + 6px); transform: translateX(-50%); z-index: 20; min-width: 210px; max-height: 270px; overflow-y: auto;
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 6px; box-shadow: 0 8px 28px rgba(0,0,0,.16); text-align: left; }
+  .tmenu[hidden] { display: none; }
+  .opt { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 40px; padding: 0 12px; border: 0; border-radius: 10px; background: none; color: var(--ink); font-size: 15px; text-align: left; }
+  .opt:hover, .opt:focus-visible { background: var(--seg); }
+  .opt.on { font-weight: 600; }
+  .opt .ck { margin-left: auto; color: var(--accent); font-size: 14px; }
+  .opt.more { color: var(--accent); border-top: 1px solid var(--line); border-radius: 0 0 10px 10px; margin-top: 4px; }
   .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; box-shadow: 0 0 0 1px var(--line); }
-  .picker { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 8px; }
-  .picker input {
-    width: 64px; padding: 8px; text-align: center; font: inherit; font-size: 20px; font-weight: 500;
-    background: var(--page); color: var(--ink); border: 1px solid var(--line); border-radius: 12px;
-  }
-  .picker span { color: var(--soft); font-size: 15px; margin-right: 6px; }
+  .picker { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .preset { min-height: 34px; padding: 0 14px; border-radius: 999px; border: 0; background: var(--seg); color: var(--ink); font-size: 14px; font-variant-numeric: tabular-nums; }
+  .preset.on { background: var(--ink); color: var(--page); }
+  @media (max-width: 430px) { .presets { gap: 6px; } .preset { padding: 0 11px; } }
+  .preset:disabled, .cdfield input:disabled { opacity: .5; }
+  .cdfield { display: inline-flex; align-items: center; gap: 8px; color: var(--soft); font-size: 14px; }
+  .cdfield input { width: 92px; padding: 8px; text-align: center; font: inherit; font-size: 18px; font-weight: 500; background: var(--page); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; }
   .time {
     font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Inter, sans-serif;
     font-size: clamp(56px, 15vw, 96px); font-weight: 600; letter-spacing: -0.03em; line-height: 1.05;
@@ -141,6 +160,13 @@
   .row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 9px 0; font-size: 15px; border-top: 1px solid var(--line); }
   .row > span { display: flex; align-items: center; gap: 8px; min-width: 0; color: var(--soft); }
   .row b { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .row .val { display: flex; align-items: center; gap: 6px; flex: none; }
+  /* Tombol Quick Play: muncul saat baris di-hover/fokus; di layar sentuh selalu terlihat */
+  .qp { width: 28px; height: 28px; flex: none; border-radius: 50%; border: 0; background: var(--accent); color: var(--accent-ink); font-size: 11px; line-height: 1; padding: 0 0 0 1px; opacity: 0; transform: scale(.85); transition: opacity .15s, transform .15s; }
+  .row:hover .qp, .row:focus-within .qp, .topic:hover .qp, .topic:focus-within .qp, .qp:focus-visible, .qp.on { opacity: 1; transform: none; }
+  .qp.on { background: var(--ink); color: var(--page); padding: 0; }
+  @media (hover: none) { .qp { opacity: .9; transform: none; } }
+  .qp:disabled { visibility: hidden; }
   .tag { font-size: 12px; color: var(--faint); }
 
   details { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 10px; }
@@ -160,6 +186,8 @@
   .lbl { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--soft); }
   .sm { min-height: 40px; font-size: 15px; padding: 0 14px; border-radius: 980px; background: none; color: var(--accent); border: 1px solid var(--accent); flex: none; }
   .sm:not(:disabled):hover { background: var(--accent); color: var(--accent-ink); }
+  .sm.danger { color: var(--danger); border-color: var(--danger); }
+  .sm.danger:not(:disabled):hover { background: var(--danger); color: #fff; }
   .add { width: 100%; margin-top: 12px; }
 
   /* ---------- Statistik ---------- */
@@ -210,14 +238,28 @@
   .topic .top { display: flex; justify-content: space-between; gap: 12px; font-size: 15px; }
   .topic .top span { display: flex; align-items: center; gap: 8px; min-width: 0; }
   .topic .top b { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+  .topic .top .val { display: flex; align-items: center; gap: 8px; flex: none; }
   .topic .bar { height: 6px; margin: 8px 0 2px; }
 
   .hist { margin-top: 4px; }
   .hrow { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; }
   .hrow .when { color: var(--soft); font-size: 13px; }
+  .hrow select, .hrow input, .hrow .x { transition: opacity .15s, border-color .15s, background .15s; }
+  /* Kontrol edit/hapus hanya terlihat saat baris di-hover atau difokus */
+  @media (hover: hover) {
+    .hrow select, .hrow input { border-color: transparent; background: transparent; appearance: none; -webkit-appearance: none; }
+    .hrow select { padding-left: 0; font-weight: 500; }
+    .hrow:hover select, .hrow:hover input, .hrow:focus-within select, .hrow:focus-within input { border-color: var(--line); background: var(--page); appearance: auto; -webkit-appearance: auto; padding-left: 6px; }
+    .hrow .x { opacity: 0; }
+    .hrow:hover .x, .hrow:focus-within .x, .hrow .x:focus-visible { opacity: 1; }
+  }
   .hrow select, .hrow input { min-height: 34px; font: inherit; font-size: 15px; border-radius: 8px; border: 1px solid var(--line); background: var(--page); color: var(--ink); padding: 0 6px; max-width: 100%; }
   .hrow input { width: 64px; text-align: right; }
-  .hrow .x { width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--seg); color: var(--soft); font-size: 14px; }
+  .hrow .x { width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--danger-bg); color: var(--danger); font-size: 14px; }
+  .hrow .x:hover { background: var(--danger); color: #fff; }
+  .more { display: flex; gap: 8px; justify-content: center; padding-top: 12px; border-top: 1px solid var(--line); }
+  .more button { min-height: 36px; padding: 0 16px; border-radius: 999px; border: 0; background: var(--seg); color: var(--ink); font-size: 14px; }
+  .more button:hover { background: var(--seg-on); }
   .empty { color: var(--soft); font-size: 15px; padding: 8px 0; }
 
   /* ---------- Landscape: Windows/desktop dan HP mendatar ---------- */
@@ -355,8 +397,8 @@
       <div class="chips" id="chips"></div>
       <p class="empty" id="noCats" hidden></p>
       <div class="picker" id="picker" hidden>
-        <input id="hours" type="text" inputmode="numeric" maxlength="2" value="1" aria-label="Jam"><span>jam</span>
-        <input id="mins" type="text" inputmode="numeric" maxlength="2" value="0" aria-label="Menit"><span>menit</span>
+        <div class="presets" id="presets" role="group" aria-label="Durasi cepat"></div>
+        <label class="cdfield">atau ketik <input id="cdIn" type="text" inputmode="text" maxlength="6" value="60" aria-label="Durasi dalam menit (boleh 1:30)" title="Menit, atau jam:menit seperti 1:30"> menit</label>
       </div>
       <div class="time" id="time" role="timer">00:00:00</div>
       <div class="status" id="status">Siap dimulai</div>
@@ -599,14 +641,26 @@
   const tabs = { timer: $('tabTimer'), cats: $('tabKat'), stats: $('tabSt') };
   const modeBtns = { stopwatch: $('mSw'), countdown: $('mCd'), category: $('mBr') };
   let view = 'timer';
-  const hoursEl = $('hours'), minsEl = $('mins');
+  const cdIn = $('cdIn');
+  const PRESETS = [15, 25, 45, 60, 90, 120];
   let mode = 'stopwatch';
   let runBefore = 0, cdLimit = 0, finished = false;   // akumulasi per putaran stopwatch/hitung mundur
   const running = () => !!S.active;
   const runElapsed = () => runBefore + (S.active ? Date.now() - S.active.start : 0);
 
-  function setLock(on) { Object.values(modeBtns).forEach(t => t.disabled = on); hoursEl.disabled = minsEl.disabled = on || (mode === 'countdown' && runBefore > 0); }
-  function readLimit() { cdLimit = Math.max(60, ((parseInt(hoursEl.value, 10) || 0) * 3600 + (parseInt(minsEl.value, 10) || 0) * 60)) * 1000; }
+  function setLock(on) { Object.values(modeBtns).forEach(t => t.disabled = on); cdIn.disabled = on || (mode === 'countdown' && runBefore > 0); $('presets').querySelectorAll('button').forEach(b => b.disabled = cdIn.disabled); }
+  // Durasi countdown: "90" = 90 menit, "1:30" = 1 jam 30 menit
+  function parseMin(s) {
+    s = String(s).trim().replace(',', '.');
+    const m = s.match(/^(\d{1,2})[:.](\d{1,2})$/);
+    const v = m ? (+m[1]) * 60 + (+m[2]) : parseFloat(s);
+    return isNaN(v) ? 0 : Math.min(1440, Math.round(v));
+  }
+  const fmtPreset = m => m < 60 ? m + 'm' : m % 60 ? Math.floor(m / 60) + 'j' + (m % 60) : (m / 60) + 'j';
+  function readLimit() { cdLimit = Math.max(1, parseMin(cdIn.value)) * 60000; syncPresets(); }
+  function syncPresets() { const cur = Math.round(cdLimit / 60000); $('presets').querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.dataset.m === cur)); }
+  PRESETS.forEach(m => { const b = el('button', { className: 'preset', textContent: fmtPreset(m), title: m + ' menit' }); b.dataset.m = m;
+    b.onclick = () => { if (b.disabled) return; cdIn.value = String(m); readLimit(); render(); }; $('presets').appendChild(b); });
 
   let beforeStartHook = null, starting = false;
   function toggle() {
@@ -668,9 +722,27 @@
     const none = $('noCats');
     none.hidden = list.length > 0;
     none.textContent = mode === 'category' ? 'Belum ada kategori Istirahat. Tambahkan di tab Kategori.' : 'Belum ada kategori Belajar. Tambahkan di tab Kategori.';
+    if (!list.length) return;
+    const cur = list.find(k => k.id === S.sel) || list[0];
+    const pill = el('button', { className: 'tpill', type: 'button', title: 'Pilih topik' },
+      [dotEl(cur.color), el('span', { className: 'nm', textContent: cur.name }), el('span', { className: 'car', textContent: '▾', 'aria-hidden': 'true' })]);
+    pill.setAttribute('aria-haspopup', 'listbox'); pill.setAttribute('aria-expanded', 'false');
+    const menu = el('div', { className: 'tmenu', hidden: true }); menu.setAttribute('role', 'listbox');
+    const close = () => { menu.hidden = true; pill.setAttribute('aria-expanded', 'false'); document.removeEventListener('pointerdown', away, true); document.removeEventListener('keydown', esc, true); };
+    const away = e => { if (!wrap.contains(e.target)) close(); };
+    const esc = e => { if (e.key === 'Escape') { close(); pill.focus(); } };
+    pill.onclick = () => {
+      if (!menu.hidden) { close(); return; }
+      menu.hidden = false; pill.setAttribute('aria-expanded', 'true');
+      document.addEventListener('pointerdown', away, true); document.addEventListener('keydown', esc, true);
+      const on = menu.querySelector('.opt.on'); if (on) on.scrollIntoView({ block: 'nearest' });
+    };
     list.forEach(k => {
-      const b = el('button', { className: 'chip' + (k.id === S.sel ? ' on' : ''), title: k.type === 'study' ? 'Belajar' : k.type === 'rest' ? 'Istirahat' : 'Diabaikan' }, [dotEl(k.color), k.name]);
+      const b = el('button', { className: 'opt' + (k.id === S.sel ? ' on' : ''), type: 'button', title: k.type === 'study' ? 'Belajar' : k.type === 'rest' ? 'Istirahat' : 'Diabaikan' },
+        [dotEl(k.color), k.name, k.id === S.sel ? el('span', { className: 'ck', textContent: '✓' }) : null]);
+      b.setAttribute('role', 'option'); b.setAttribute('aria-selected', String(k.id === S.sel));
       b.onclick = () => {
+        close();
         if (k.id === S.sel) return;
         const was = running();
         if (was) endSession(undefined, true);
@@ -678,8 +750,13 @@
         if (was) startSession();
         save(); render();
       };
-      box.appendChild(b);
+      menu.appendChild(b);
     });
+    const more = el('button', { className: 'opt more', type: 'button', textContent: 'Kelola kategori…' });
+    more.onclick = () => { close(); setView('cats'); };
+    menu.appendChild(more);
+    const wrap = el('div', { className: 'topicsel' }, [pill, menu]);
+    box.appendChild(wrap);
   }
 
   function render() {
@@ -738,23 +815,51 @@
     $('todayMeta').textContent = !target ? 'Target harian belum diatur'
       : t.study >= target ? 'Target harian tercapai · istirahat ' + fmtDur(t.rest)
       : 'Kurang ' + fmtDur(target - t.study) + ' · istirahat ' + fmtDur(t.rest);
-    const rows = $('rows'); rows.textContent = '';
-    S.cats.forEach(k => {
-      const ms = t.by[k.id] || 0;
-      const lab = k.type === 'study' ? (k.limit ? ' / ' + fmtDur(k.limit * M) : '') : k.type === 'rest' ? (k.limit ? ' / batas ' + fmtDur(k.limit * M) : '') : '';
-      rows.appendChild(el('div', { className: 'row' }, [
-        el('span', {}, [dotEl(k.color), k.name, el('span', { className: 'tag', textContent: k.type === 'study' ? 'belajar' : k.type === 'rest' ? 'istirahat' : 'diabaikan' })]),
-        el('b', { textContent: fmtDur(ms) + lab })
-      ]));
-    });
-    Object.keys(t.by).forEach(id => {
-      const g = !cat(id) && S.gone[id];
-      if (!g || !t.by[id] || g.type === 'ignore') return;
-      rows.appendChild(el('div', { className: 'row' }, [
-        el('span', {}, [dotEl(g.color), g.name, el('span', { className: 'tag', textContent: (g.type === 'study' ? 'belajar' : 'istirahat') + ' · dihapus' })]),
-        el('b', { textContent: fmtDur(t.by[id]) })
-      ]));
-    });
+    // Baris dibuat ulang hanya bila daftarnya berubah; selain itu hanya angkanya yang diperbarui,
+    // supaya tombol ▶ tidak diganti di antara tekan dan lepas klik.
+    const rows = $('rows');
+    const lab = k => k.type === 'study' ? (k.limit ? ' / ' + fmtDur(k.limit * M) : '') : k.type === 'rest' ? (k.limit ? ' / batas ' + fmtDur(k.limit * M) : '') : '';
+    const goneIds = Object.keys(t.by).filter(id => !cat(id) && S.gone[id] && t.by[id] && S.gone[id].type !== 'ignore');
+    const sig = S.cats.map(k => [k.id, k.name, k.color, k.type, k.limit].join('|')).join('~') + '#' + goneIds.join(',') + '#' + (S.active ? S.active.cat : '');
+    if (rows._sig !== sig) {
+      rows._sig = sig; rows.textContent = ''; rows._vals = {};
+      S.cats.forEach(k => {
+        const v = el('b'); rows._vals[k.id] = v;
+        const on = S.active && S.active.cat === k.id;
+        const qp = el('button', { className: 'qp' + (on ? ' on' : ''), type: 'button', textContent: on ? '❚❚' : '▶', title: (on ? 'Jeda ' : 'Mulai ') + k.name });
+        qp.setAttribute('aria-label', (on ? 'Jeda ' : 'Mulai ') + k.name);
+        qp.onclick = () => quickPlay(k.id);
+        rows.appendChild(el('div', { className: 'row' }, [
+          el('span', {}, [dotEl(k.color), k.name, el('span', { className: 'tag', textContent: k.type === 'study' ? 'belajar' : k.type === 'rest' ? 'istirahat' : 'diabaikan' })]),
+          el('div', { className: 'val' }, [v, qp])
+        ]));
+      });
+      goneIds.forEach(id => {
+        const g = S.gone[id], v = el('b'); rows._vals[id] = v;
+        rows.appendChild(el('div', { className: 'row' }, [
+          el('span', {}, [dotEl(g.color), g.name, el('span', { className: 'tag', textContent: (g.type === 'study' ? 'belajar' : 'istirahat') + ' · dihapus' })]),
+          el('div', { className: 'val' }, [v, el('span', { style: 'width:28px;flex:none' })])
+        ]));
+      });
+    }
+    S.cats.forEach(k => { const v = rows._vals[k.id]; if (v) { const s = fmtDur(t.by[k.id] || 0) + lab(k); if (v.textContent !== s) v.textContent = s; } });
+    goneIds.forEach(id => { const v = rows._vals[id]; if (v) { const s = fmtDur(t.by[id]); if (v.textContent !== s) v.textContent = s; } });
+  }
+
+  // Mulai/jeda langsung dari daftar topik (Hari ini, Per topik)
+  function quickPlay(id) {
+    const k = cat(id); if (!k) return;
+    unlock(); stopBeepSpam();
+    if (running() && S.active.cat === id) { toggle(); return; }              // baris yang sedang jalan: jeda
+    const want = groupOf(k) === 'rest' ? 'category' : (mode === 'category' ? 'stopwatch' : mode);
+    if (running() && want !== mode) { runBefore = runElapsed(); endSession(); setLock(false); }   // beda kelompok: jeda dulu
+    if (want !== mode) setMode(want);
+    if (!S.selBy) S.selBy = {};
+    if (running()) { endSession(undefined, true); S.sel = id; S.selBy[groupOf(k)] = id; startSession(); save(); render(); return; }
+    S.sel = id; S.selBy[groupOf(k)] = id; save();
+    if (view !== 'timer') setView('timer');
+    chipSig = ''; render();
+    toggle();
   }
 
   /* ---------- Pengaturan kategori ---------- */
@@ -765,7 +870,7 @@
       col.oninput = function () { k.color = this.value; save(); render(); };
       const nm = el('input', { type: 'text', value: k.name, maxLength: 24, title: 'Nama kategori' });
       nm.oninput = function () { k.name = this.value || '?'; save(); render(); };
-      const del = el('button', { className: 'sm', textContent: '✕', title: 'Hapus kategori', disabled: S.cats.length < 2 || (S.active && S.active.cat === k.id) });
+      const del = el('button', { className: 'sm danger', textContent: '✕', title: 'Hapus kategori', disabled: S.cats.length < 2 || (S.active && S.active.cat === k.id) });
       del.onclick = () => {
         if (!confirmDel(k, del)) return;
         bury(k); S.cats = S.cats.filter(z => z !== k);
@@ -957,16 +1062,24 @@
     }
   }
 
+  function playBtn(c) {
+    if (!cat(c.id)) return null;            // kategori yang sudah dihapus tidak bisa dimainkan
+    const on = S.active && S.active.cat === c.id;
+    const b = el('button', { className: 'qp' + (on ? ' on' : ''), type: 'button', textContent: on ? '❚❚' : '▶', title: (on ? 'Jeda ' : 'Mulai ') + c.name });
+    b.setAttribute('aria-label', (on ? 'Jeda ' : 'Mulai ') + c.name);
+    b.onclick = () => quickPlay(c.id);
+    return b;
+  }
   function renderTopics(byCat, nDays, sumR) {
     const box = $('topics'); box.textContent = '';
     const study = S.cats.filter(c => c.type === 'study')
       .concat(Object.values(S.gone).filter(g => g.type === 'study' && !cat(g.id) && byCat[g.id] > 0).map(g => Object.assign({}, g, { name: g.name + ' (dihapus)' })));
-    if (!study.length) { box.appendChild(el('p', { className: 'empty', textContent: 'Belum ada kategori bertanda Belajar. Atur di tab Break.' })); return; }
+    if (!study.length) { box.appendChild(el('p', { className: 'empty', textContent: 'Belum ada kategori bertanda Belajar. Atur di tab Kategori.' })); return; }
     study.slice().sort((a, b) => (byCat[b.id] || 0) - (byCat[a.id] || 0)).forEach(c => {
       const ms = byCat[c.id] || 0, tgt = (c.limit || 0) * M * nDays;
       const bar = el('div', { className: 'bar' }, [el('i', { style: 'width:' + (tgt ? Math.min(100, ms / tgt * 100) : 0) + '%;background:' + c.color })]);
       box.appendChild(el('div', { className: 'topic' }, [
-        el('div', { className: 'top' }, [el('span', {}, [dotEl(c.color), c.name]), el('b', { textContent: fmtDur(ms) + (tgt ? ' / ' + fmtDur(tgt) : '') })]),
+        el('div', { className: 'top' }, [el('span', {}, [dotEl(c.color), c.name]), el('div', { className: 'val' }, [el('b', { textContent: fmtDur(ms) + (tgt ? ' / ' + fmtDur(tgt) : '') }), playBtn(c)])]),
         tgt ? bar : null,
         el('div', { className: 'meta', textContent: tgt ? Math.round(ms / tgt * 100) + '% dari target topik' : 'Tanpa target topik' })
       ]));
@@ -977,6 +1090,7 @@
     ]));
   }
 
+  const HIST_PAGE = 8; let histN = HIST_PAGE, histKey = '';
   function renderHist(useSample, R, keys) {
     const box = $('hist'); box.textContent = '';
     $('histHint').textContent = useSample ? 'Riwayat selalu menampilkan sesi asli Anda, bukan data contoh.' : 'Ubah kategori atau durasi (menit), atau hapus sesi yang salah.';
@@ -987,8 +1101,10 @@
     const nConf = S.sessions.filter(s => conf.has(s.id) && s.end > a && s.start < b).length;
     $('confNote').hidden = !nConf;
     $('confNote').textContent = nConf ? nConf + ' sesi saling tumpang tindih di periode ini (biasanya dari timer offline di dua perangkat). Waktunya terhitung ganda; cek tanda oranye di Riwayat dan hapus atau ubah salah satunya.' : '';
-    const list = S.sessions.filter(s => s.end > a && s.start < b).sort((x, y) => (conf.has(y.id) - conf.has(x.id)) || (y.start - x.start)).slice(0, 30);
-    if (!list.length) { box.appendChild(el('p', { className: 'empty', textContent: 'Belum ada sesi di periode ini.' })); return; }
+    const full = S.sessions.filter(s => s.end > a && s.start < b).sort((x, y) => (conf.has(y.id) - conf.has(x.id)) || (y.start - x.start));
+    if (!full.length) { box.appendChild(el('p', { className: 'empty', textContent: 'Belum ada sesi di periode ini.' })); return; }
+    const hk = per + ':' + offset; if (histKey !== hk) { histKey = hk; histN = HIST_PAGE; }
+    const list = full.slice(0, histN);
     list.forEach(s => {
       const d = new Date(s.start + TZ);
       const when = HARI[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + BLN[d.getUTCMonth()] + ' · ' + pad(d.getUTCHours()) + '.' + pad(d.getUTCMinutes());
@@ -998,7 +1114,7 @@
       sel.onchange = function () { s.cat = this.value; save(); renderStats(); };
       const dur = el('input', { type: 'number', min: 1, max: 1440, value: Math.max(1, Math.round((s.end - s.start) / M)), title: 'Durasi (menit)', inputMode: 'numeric' });
       dur.onchange = function () { const v = parseInt(this.value, 10); if (v > 0) { s.end = s.start + v * M; save(); renderStats(); } };
-      const x = el('button', { className: 'x', textContent: '✕', title: 'Hapus sesi' });
+      const x = el('button', { className: 'x', textContent: '✕', title: 'Hapus sesi' }); x.setAttribute('aria-label', 'Hapus sesi');
       x.onclick = () => { S.sessions = S.sessions.filter(z => z !== s); save(); renderStats(); };
       const dv = s.dev ? ' · ' + String(s.dev).split('-')[0] : '';
       box.appendChild(el('div', { className: 'hrow' + (conf.has(s.id) ? ' conf' : '') }, [
@@ -1006,6 +1122,12 @@
         el('label', { className: 'lbl' }, [dur, 'm']), x
       ]));
     });
+    if (full.length > HIST_PAGE) {
+      const left = full.length - list.length, bar = el('div', { className: 'more' });
+      if (left > 0) { const m = el('button', { type: 'button', textContent: 'Tampilkan ' + Math.min(HIST_PAGE, left) + ' lagi · sisa ' + left }); m.onclick = () => { histN += HIST_PAGE; renderStats(); }; bar.appendChild(m); }
+      if (histN > HIST_PAGE) { const c = el('button', { type: 'button', textContent: 'Ringkas' }); c.onclick = () => { histN = HIST_PAGE; renderStats(); }; bar.appendChild(c); }
+      box.appendChild(bar);
+    }
   }
 
   // Pengaturan statistik
@@ -1476,10 +1598,8 @@
   $('prev').onclick = () => { anim = true; offset--; renderStats(); };
   $('next').onclick = () => { if (offset < 0) { offset++; anim = true; }; renderStats(); };
   $('useSample').onchange = function () { S.sample = this.checked; anim = true; save(); renderStats(); };
-  [hoursEl, minsEl].forEach(e => {
-    e.oninput = () => { e.value = e.value.replace(/\D/g, ''); };
-    e.onchange = () => { if (!running() && runBefore === 0) { readLimit(); render(); } };
-  });
+  cdIn.oninput = () => { cdIn.value = cdIn.value.replace(/[^\d:.,]/g, ''); if (!running() && runBefore === 0) { readLimit(); render(); } };
+  cdIn.onchange = () => { if (!running() && runBefore === 0) { const m = Math.max(1, parseMin(cdIn.value)); cdIn.value = String(m); readLimit(); render(); } };
   window.addEventListener('pagehide', saveLocal);
 
   // Sesi yang masih aktif dari kunjungan sebelumnya dilanjutkan (waktu tetap dihitung).
@@ -1487,7 +1607,7 @@
   setInterval(() => {
     if (view === 'cats') { if (running()) document.title = fmtHMS(Date.now() - S.active.start) + ' · ' + ((cat(S.active.cat) || {}).name || ''); return; }
     if (view !== 'stats') render();
-    else if ((S.active && Date.now() - lastStatsAt > 5000) || dayKey(Date.now()) !== lastStatsDay) { lastStatsAt = Date.now(); lastStatsDay = dayKey(Date.now()); if (!document.activeElement || !document.activeElement.closest('.hist, details')) renderStats(); }
+    else if ((S.active && Date.now() - lastStatsAt > 5000) || dayKey(Date.now()) !== lastStatsDay) { lastStatsAt = Date.now(); lastStatsDay = dayKey(Date.now()); if ((!document.activeElement || !document.activeElement.closest('.hist, details')) && !document.querySelector('#viewStats .qp:hover, #viewStats .x:hover, #viewStats .more button:hover')) renderStats(); }
   }, 250);
 
   readLimit();
