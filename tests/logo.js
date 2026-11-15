@@ -1,0 +1,25 @@
+const {APP,MOCK,shot}=require('./_app');
+const {chromium}=require('playwright');const ok=(c,m)=>console.log((c?'PASS ':'FAIL ')+m);
+(async()=>{const b=await chromium.launch();const H=3600e3,now=Date.now();
+const mk=async(sess,scheme,target=180)=>{const c=await b.newContext({viewport:{width:1366,height:768},colorScheme:scheme,deviceScaleFactor:3});
+ const seed=JSON.stringify({v:2,set:{target,dayStart:4,maxH:3},cats:[{id:'a',name:'Matematika',color:'#0071e3',type:'study',limit:60},{id:'m',name:'Main',color:'#86868b',type:'rest',limit:30}],sel:'a',sessions:sess,active:null,sample:false});
+ await c.addInitScript(s=>{if(!sessionStorage.__s){localStorage.setItem('study_break_v2',s);sessionStorage.__s='1';}},seed);
+ const p=await c.newPage();p.errs=[];p.on('pageerror',e=>p.errs.push(e.message));await p.goto(APP);await p.waitForTimeout(500);return p;};
+const S=(cat,h,ago)=>({id:cat+ago+h,cat,start:now-ago*H-h*H,end:now-ago*H});
+let p=await mk([S('a',1.5,0.2),S('m',3,0.1),S('a',1,26),S('a',1,50)],'light');
+let t=await p.getAttribute('.brand','title');ok(/1j 30m dari 3j \(50%\)/.test(t),'tooltip progres hari ini (istirahat tidak dihitung): '+t);
+ok(/Ritme 7 hari: 3\/7/.test(t),'ritme 7 hari dihitung');
+await p.locator('.brand').screenshot({path:shot('mark-50.png')});
+p=await mk([S('a',4,0.2)],'light');ok((await p.getAttribute('.brand','title')).includes('100%'),'target tercapai = 100%');
+p=await mk([S('a',1,0.2)],'dark');ok(await p.isVisible('#orbit svg.od')&&!(await p.isVisible('#orbit svg.ol')),'mode gelap memakai varian gelap');
+await p.locator('.brand').screenshot({path:shot('mark-dark.png')});
+p=await mk([],'light',0);ok((await p.getAttribute('.brand','title')).startsWith('Hari ini 0m belajar'),'tanpa target: blok 60° statis');
+// berjalan: logo ikut bertambah
+p=await mk([S('a',1.49,0.2)],'light');const t0=await p.getAttribute('.brand','title');
+await p.click('#toggle');await p.waitForTimeout(1200);
+await p.evaluate(()=>{const s=JSON.parse(localStorage.getItem('study_break_v2'));});
+ok(/Berjalan/.test(await p.textContent('#status')),'timer berjalan');
+const ff=await p.evaluate(()=>getComputedStyle(document.getElementById('time')).fontFeatureSettings);ok(/zero/.test(ff)&&/tnum/.test(ff),'angka timer: tnum + slashed zero ('+ff+')');
+const ls=await p.evaluate(()=>getComputedStyle(document.querySelector('.brand b')).letterSpacing);ok(ls.startsWith('-0.47')||ls.startsWith('-0.4'),'wordmark tracking -0.025em ('+ls+')');
+ok(p.errs.length===0,'tanpa error JS '+p.errs);
+await b.close();})();

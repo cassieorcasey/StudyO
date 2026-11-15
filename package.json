@@ -1,0 +1,13 @@
+{
+  "name": "studyo",
+  "private": true,
+  "description": "StudyO: pencatat waktu belajar dan istirahat (satu file HTML, sinkron lewat Supabase).",
+  "scripts": {
+    "build": "python3 build.py",
+    "test": "python3 build.py && node tests/run.js",
+    "icons": "node src/icons.js && python3 build.py"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}
