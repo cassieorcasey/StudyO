@@ -18,6 +18,7 @@
     --seg: #e8e8ed; --seg-on: #ffffff; --nav: rgba(251,251,253,0.8);
     --accent: #0071e3; --accent-hover: #0077ed; --accent-ink: #ffffff;
     --rest: #a1a1a6; --line: rgba(0,0,0,0.1); --warn: #bf4800; --danger: #d70015; --danger-bg: rgba(215,0,21,.09);
+    --amber-bg: #fff1dc; --amber-ink: #8a4300; --card-edge: 0 0 0 0.5px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04), 0 6px 20px rgba(0,0,0,.05);
     --heat0: #ebebf0;
     color-scheme: light;
   }
@@ -28,6 +29,7 @@
       --accent: #2997ff; --accent-hover: #4aa8ff; --accent-ink: #000000;
       --rest: #6e6e73; --line: rgba(255,255,255,0.14); --warn: #ff9f0a;
       --danger: #ff6961; --danger-bg: rgba(255,105,97,.16);
+      --amber-bg: rgba(255,159,10,.18); --amber-ink: #ffb340; --card-edge: 0 0 0 0.5px rgba(255,255,255,.08);
       --heat0: #2c2c2e;
       color-scheme: dark;
     }
@@ -38,6 +40,7 @@
     --accent: #2997ff; --accent-hover: #4aa8ff; --accent-ink: #000000;
     --rest: #6e6e73; --line: rgba(255,255,255,0.14); --warn: #ff9f0a;
     --danger: #ff6961; --danger-bg: rgba(255,105,97,.16);
+    --amber-bg: rgba(255,159,10,.18); --amber-ink: #ffb340; --card-edge: 0 0 0 0.5px rgba(255,255,255,.08);
     --heat0: #2c2c2e;
     color-scheme: dark;
   }
@@ -92,35 +95,27 @@
     padding: 24px max(16px, env(safe-area-inset-right)) max(32px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
   }
   .grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
-  .card { background: var(--card); border-radius: 22px; padding: 28px 24px; min-width: 0; overflow: hidden; }
+  .card { background: var(--card); border-radius: 22px; padding: 28px 24px; min-width: 0; overflow: hidden; box-shadow: var(--card-edge); }
   .eyebrow { font-size: 14px; font-weight: 600; color: var(--soft); letter-spacing: -0.016em; margin: 0 0 4px; }
   h2 { font-size: 28px; line-height: 1.14; font-weight: 600; letter-spacing: 0.007em; margin: 0 0 16px; }
   h3 { font-size: 19px; font-weight: 600; letter-spacing: 0.012em; margin: 0 0 12px; }
 
   /* ---------- Timer ---------- */
   .timer { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 20px; }
+  .glabel { font-size: 13px; font-weight: 600; color: var(--soft); margin: 0 0 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 18px; max-width: 520px; }
   .chip {
-    display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px;
-    border-radius: 999px; font-size: 14px; border: 0; background: var(--seg); color: var(--ink);
-    transition: background .2s, color .2s;
+    --c: var(--accent);
+    display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px 0 12px;
+    border-radius: 999px; font-size: 15px; border: 1.5px solid transparent; background: var(--seg); color: var(--ink);
+    transition: background .2s, border-color .2s;
   }
-  .chip.on { background: var(--ink); color: var(--page); }
-  /* Pill topik dengan menu pilihan (▾) */
-  .topicsel { position: relative; display: inline-block; }
-  .tpill { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px 0 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--seg); color: var(--ink); font-size: 15px; font-weight: 500; max-width: 100%; }
-  .tpill .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 46vw; }
-  .tpill .car { color: var(--soft); font-size: 12px; transition: transform .2s; }
-  .tpill[aria-expanded="true"] .car { transform: rotate(180deg); }
-  .tpill:not(:disabled):hover { background: var(--seg-on); }
-  .tmenu { position: absolute; left: 50%; top: calc(100% + 6px); transform: translateX(-50%); z-index: 20; min-width: 210px; max-height: 270px; overflow-y: auto;
-    background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 6px; box-shadow: 0 8px 28px rgba(0,0,0,.16); text-align: left; }
-  .tmenu[hidden] { display: none; }
-  .opt { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 40px; padding: 0 12px; border: 0; border-radius: 10px; background: none; color: var(--ink); font-size: 15px; text-align: left; }
-  .opt:hover, .opt:focus-visible { background: var(--seg); }
-  .opt.on { font-weight: 600; }
-  .opt .ck { margin-left: auto; color: var(--accent); font-size: 14px; }
-  .opt.more { color: var(--accent); border-top: 1px solid var(--line); border-radius: 0 0 10px 10px; margin-top: 4px; }
+  .chip:not(.on):hover { background: var(--seg-on); box-shadow: 0 0 0 1px var(--line); }
+  .chip .dot { width: 10px; height: 10px; background: var(--c); box-shadow: none; }
+  .chip.on { background: var(--ink); color: var(--page); font-weight: 600; }
+  .chip.on .dot { box-shadow: 0 0 0 1.5px var(--page); }
+  .chip.manage { padding: 0 14px; color: var(--accent); background: none; border: 0; font-size: 14px; }
+  .chip.manage:hover { background: none; box-shadow: none; text-decoration: underline; }
   .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; box-shadow: 0 0 0 1px var(--line); }
   .picker { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 8px; }
   .presets { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
@@ -128,15 +123,28 @@
   .preset.on { background: var(--ink); color: var(--page); }
   @media (max-width: 430px) { .presets { gap: 6px; } .preset { padding: 0 11px; } }
   .preset:disabled, .cdfield input:disabled { opacity: .5; }
-  .cdfield { display: inline-flex; align-items: center; gap: 8px; color: var(--soft); font-size: 14px; }
-  .cdfield input { width: 92px; padding: 8px; text-align: center; font: inherit; font-size: 18px; font-weight: 500; background: var(--page); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; }
+  .cdfield { display: inline-flex; align-items: center; gap: 6px; color: var(--soft); font-size: 14px; }
+  .cdfield input { width: 76px; min-height: 40px; padding: 6px; text-align: center; font: inherit; font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; background: var(--page); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; }
+  .step { width: 48px; min-height: 40px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .step:not(:disabled):hover { border-color: var(--accent); color: var(--accent); }
+  .cdhint { font-size: 13px; color: var(--soft); margin: -2px 0 0; }
   .time {
     font-family: ui-rounded, "SF Pro Rounded", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", sans-serif;
     font-size: clamp(56px, 15vw, 96px); font-weight: 600; letter-spacing: -0.03em; line-height: 1.05;
     font-variant-numeric: tabular-nums slashed-zero; font-feature-settings: "tnum", "zero"; margin: 8px 0 4px;
   }
-  .status { color: var(--soft); font-size: 17px; min-height: 26px; margin-bottom: 24px; }
-  .run .status { color: var(--accent); }
+  .tlabel { font-size: 13px; font-weight: 600; color: var(--soft); text-transform: none; margin: 4px 0 -2px; min-height: 18px; }
+  .status { display: inline-flex; align-items: center; justify-content: center; gap: 8px; color: var(--soft); font-size: 17px; min-height: 26px; margin-bottom: 14px; }
+  .status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--faint); flex: none; }
+  .run .status { color: var(--ink); font-weight: 500; }
+  .run .status::before { background: var(--accent); animation: pulse 1.6s ease-out infinite; }
+  .paused .status::before { background: none; border: 1.5px solid var(--soft); width: 7px; height: 7px; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); } 100% { box-shadow: 0 0 0 9px transparent; } }
+  .tprog { width: 100%; max-width: 360px; margin: 0 0 22px; }
+  .tprog .bar { height: 6px; margin: 0 0 6px; }
+  .tprog .bar i { background: var(--accent); }
+  .tprog .bar.over i { background: var(--warn); }
+  .tprog .meta { font-size: 13px; }
   .over .time, .over .status { color: var(--warn); animation: bl 1.2s ease-in-out infinite; }
   @keyframes bl { 50% { opacity: .4; } }
   @media (prefers-reduced-motion: reduce) { .over .time, .over .status { animation: none; } }
@@ -148,6 +156,20 @@
   .pill:not(:disabled):hover { background: var(--accent); color: var(--accent-ink); }
   .pill.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
   .pill.primary:not(:disabled):hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .pill.primary.pause { background: var(--seg); color: var(--ink); border-color: var(--seg); }
+  .pill.primary.pause:not(:disabled):hover { background: var(--seg-on); border-color: var(--line); color: var(--ink); }
+  .kbd { display: none; font-size: 12px; color: var(--faint); margin: 12px 0 0; }
+  .kbd kbd { font: inherit; font-weight: 600; color: var(--soft); padding: 1px 6px; border-radius: 5px; border: 1px solid var(--line); background: var(--page); }
+  @media (hover: hover) and (pointer: fine) { .kbd { display: block; } }
+  .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translate(-50%, 16px); z-index: 50; max-width: min(92vw, 420px);
+    padding: 12px 18px; border-radius: 14px; background: var(--ink); color: var(--page); font-size: 15px; font-weight: 500; box-shadow: 0 8px 28px rgba(0,0,0,.22);
+    opacity: 0; transition: opacity .2s, transform .25s cubic-bezier(.2,.8,.2,1); pointer-events: none; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .gear { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; border: 0; background: none; color: var(--soft); flex: none; }
+  .gear:hover, .gear[aria-pressed="true"] { background: var(--seg); color: var(--ink); }
+  .gear svg { width: 20px; height: 20px; }
+  .linkbtn { border: 0; background: none; padding: 0; color: var(--accent); font-size: 14px; }
+  .linkbtn:hover { text-decoration: underline; }
   .warnbox {
     margin-top: 20px; width: 100%; max-width: 360px; padding: 14px 16px; border-radius: 14px;
     background: var(--page); font-size: 15px; text-align: left;
@@ -161,6 +183,14 @@
   .bar { height: 8px; border-radius: 4px; background: var(--seg); overflow: hidden; margin: 10px 0 4px; }
   .bar i { display: block; height: 100%; background: var(--accent); border-radius: 4px; transition: width .3s; }
   .bar.restbar i { background: var(--rest); }
+  .bar.stack { display: flex; gap: 2px; background: var(--seg); }
+  .bar.stack i { border-radius: 0; flex: none; transition: width .4s cubic-bezier(.2,.8,.2,1); }
+  .bar.stack i:first-child { border-radius: 4px 0 0 4px; }
+  .rowname { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1; }
+  .rowname > span { display: flex; align-items: center; gap: 8px; min-width: 0; color: var(--soft); }
+  .mbar { height: 4px; border-radius: 2px; background: var(--seg); overflow: hidden; max-width: 220px; }
+  .mbar i { display: block; height: 100%; border-radius: 2px; transition: width .4s cubic-bezier(.2,.8,.2,1); }
+  .mbar.over i { background: var(--warn) !important; }
   .meta { font-size: 14px; color: var(--soft); }
   .rows { margin-top: 18px; }
   .row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 9px 0; font-size: 15px; border-top: 1px solid var(--line); }
@@ -168,10 +198,9 @@
   .row b { font-weight: 600; font-variant-numeric: tabular-nums; }
   .row .val { display: flex; align-items: center; gap: 6px; flex: none; }
   /* Tombol Quick Play: muncul saat baris di-hover/fokus; di layar sentuh selalu terlihat */
-  .qp { width: 28px; height: 28px; flex: none; border-radius: 50%; border: 0; background: var(--accent); color: var(--accent-ink); font-size: 11px; line-height: 1; padding: 0 0 0 1px; opacity: 0; transform: scale(.85); transition: opacity .15s, transform .15s; }
-  .row:hover .qp, .row:focus-within .qp, .topic:hover .qp, .topic:focus-within .qp, .qp:focus-visible, .qp.on { opacity: 1; transform: none; }
-  .qp.on { background: var(--ink); color: var(--page); padding: 0; }
-  @media (hover: none) { .qp { opacity: .9; transform: none; } }
+  .qp { width: 32px; height: 32px; flex: none; border-radius: 50%; border: 1px solid var(--line); background: var(--card); color: var(--accent); font-size: 11px; line-height: 1; padding: 0 0 0 2px; transition: background .15s, color .15s, border-color .15s; }
+  .qp:hover, .qp:focus-visible { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .qp.on { background: var(--amber-bg); border-color: var(--amber-bg); color: var(--amber-ink); padding: 0; }
   .qp:disabled { visibility: hidden; }
   .tag { font-size: 12px; color: var(--faint); }
 
@@ -251,14 +280,6 @@
   .hrow { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; }
   .hrow .when { color: var(--soft); font-size: 13px; }
   .hrow select, .hrow input, .hrow .x { transition: opacity .15s, border-color .15s, background .15s; }
-  /* Kontrol edit/hapus hanya terlihat saat baris di-hover atau difokus */
-  @media (hover: hover) {
-    .hrow select, .hrow input { border-color: transparent; background: transparent; appearance: none; -webkit-appearance: none; }
-    .hrow select { padding-left: 0; font-weight: 500; }
-    .hrow:hover select, .hrow:hover input, .hrow:focus-within select, .hrow:focus-within input { border-color: var(--line); background: var(--page); appearance: auto; -webkit-appearance: auto; padding-left: 6px; }
-    .hrow .x { opacity: 0; }
-    .hrow:hover .x, .hrow:focus-within .x, .hrow .x:focus-visible { opacity: 1; }
-  }
   .hrow select, .hrow input { min-height: 34px; font: inherit; font-size: 15px; border-radius: 8px; border: 1px solid var(--line); background: var(--page); color: var(--ink); padding: 0 6px; max-width: 100%; }
   .hrow input { width: 64px; text-align: right; }
   .hrow .x { width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--danger-bg); color: var(--danger); font-size: 14px; }
@@ -384,9 +405,11 @@
     </div>
     <nav class="tabs" role="tablist" aria-label="Halaman">
       <button id="tabTimer" role="tab" aria-selected="true">Timer</button>
-      <button id="tabKat" role="tab" aria-selected="false">Kategori</button>
       <button id="tabSt" role="tab" aria-selected="false">Statistik</button>
     </nav>
+    <button class="gear" id="tabKat" type="button" aria-pressed="false" aria-label="Pengaturan" title="Pengaturan: target harian dan kategori">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
     <button class="acct" id="acct">Masuk</button>
   </div>
 </header>
@@ -400,18 +423,28 @@
         <button id="mCd" aria-pressed="false">Countdown</button>
         <button id="mBr" aria-pressed="false">Break</button>
       </div>
-      <div class="chips" id="chips"></div>
+      <p class="glabel" id="glabel">Topik belajar</p>
+      <div class="chips" id="chips" role="group" aria-labelledby="glabel"></div>
       <p class="empty" id="noCats" hidden></p>
       <div class="picker" id="picker" hidden>
         <div class="presets" id="presets" role="group" aria-label="Durasi cepat"></div>
-        <label class="cdfield">atau ketik <input id="cdIn" type="text" inputmode="text" maxlength="6" value="60" aria-label="Durasi dalam menit (boleh 1:30)" title="Menit, atau jam:menit seperti 1:30"> menit</label>
+        <div class="cdfield">
+          <button class="step" id="cdMinus" type="button" aria-label="Kurangi 5 menit">−5</button>
+          <input id="cdIn" type="text" inputmode="text" maxlength="6" value="60" aria-label="Durasi countdown dalam menit, atau jam:menit" aria-describedby="cdHint">
+          <button class="step" id="cdPlus" type="button" aria-label="Tambah 5 menit">+5</button>
+          <span>menit</span>
+        </div>
+        <p class="cdhint" id="cdHint">Ketik menit atau j:mm, misalnya 1:30</p>
       </div>
+      <p class="tlabel" id="tlabel">Sesi ini</p>
       <div class="time" id="time" role="timer">00:00:00</div>
       <div class="status" id="status">Siap dimulai</div>
+      <div class="tprog" id="tprog" hidden><div class="bar" id="tbar"><i id="tbarFill"></i></div><div class="meta" id="tmeta"></div></div>
       <div class="controls">
         <button class="pill primary" id="toggle">Mulai</button>
-        <button class="pill" id="reset" disabled>Ulangi</button>
+        <button class="pill" id="reset" disabled title="Angka kembali ke 0. Sesi yang sudah dijeda tetap tersimpan.">Kembali ke 0</button>
       </div>
+      <p class="kbd" id="kbd"><kbd>Spasi</kbd> mulai atau jeda · <kbd>R</kbd> kembali ke 0</p>
       <div class="warnbox" id="warn" hidden>
         <p id="warnText"></p>
         <div class="controls">
@@ -432,21 +465,34 @@
     <div class="card">
       <p class="eyebrow">Hari ini</p>
       <div class="big" id="todayStudy">0m <small>/ 3j</small></div>
-      <div class="bar"><i id="todayBar" style="width:0"></i></div>
+      <div class="bar stack" id="todayStack" role="img" aria-label="Belajar hari ini per topik"></div>
       <div class="meta" id="todayMeta">Belajar menuju target harian</div>
       <div class="rows" id="rows"></div>
     </div>
   </section>
 
-  <!-- ============ Kategori ============ -->
+  <!-- ============ Pengaturan: target harian + kategori ============ -->
   <section id="viewCats" hidden>
     <div class="shead">
       <div>
-        <p class="eyebrow">Belajar, istirahat, dan diabaikan</p>
-        <h2>Kategori</h2>
+        <p class="eyebrow">Target harian dan kategori</p>
+        <h2>Pengaturan</h2>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:20px">
+      <h3>Target dan hari</h3>
+      <div class="ed">
+        <label class="lbl">Target belajar harian <input class="field" type="number" id="setTarget" min="0" max="24" step="0.5"> jam</label>
+      </div>
+      <div class="ed">
+        <label class="lbl">Hari berganti pukul <select class="field" id="setDay"></select></label>
+      </div>
+      <div class="ed">
+        <label class="lbl">Tanya jika satu sesi lebih dari <input class="field" type="number" id="setMax" min="1" max="12" step="0.5"> jam</label>
       </div>
     </div>
     <div class="card">
+      <h3>Kategori</h3>
       <p class="hint katHint">Jenis menentukan statistik. Untuk <b>Belajar</b>, menit = target harian per topik. Untuk <b>Istirahat</b>, menit = batas harian; centang "Mundur" agar jadi timer hitung mundur. 0 = tanpa target/batas. Perubahan tersimpan otomatis.</p>
       <div id="cats" class="catgrid"></div>
       <button class="sm add" id="addCat">+ Tambah kategori</button>
@@ -507,22 +553,13 @@
         <h3>Riwayat sesi</h3>
         <p class="hint" id="histHint">Ubah kategori atau durasi (menit), atau hapus sesi yang salah.</p>
         <div class="hist" id="hist"></div>
-        <details>
-          <summary>Pengaturan statistik</summary>
-          <div class="ed" style="margin-top:8px">
-            <label class="lbl">Target belajar harian <input class="field" type="number" id="setTarget" min="0" max="24" step="0.5"> jam</label>
-          </div>
-          <div class="ed">
-            <label class="lbl">Hari berganti pukul <select class="field" id="setDay"></select></label>
-          </div>
-          <div class="ed">
-            <label class="lbl">Tanya jika satu sesi lebih dari <input class="field" type="number" id="setMax" min="1" max="12" step="0.5"> jam</label>
-          </div>
-        </details>
+        <p class="hint"><button class="linkbtn" id="toSet" type="button">Atur target harian dan kategori di Pengaturan</button></p>
       </div>
     </div>
   </section>
 </main>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <dialog class="sheet" id="acctDlg" aria-label="Akun">
   <button class="dclose" id="dlgClose" aria-label="Tutup">✕</button>
@@ -700,10 +737,24 @@
   /* ---------- Sesi aktif ---------- */
   let onStartHook = null, onEndHook = null;
   function startSession(quiet) { S.active = { cat: S.sel, start: Date.now(), ok: false }; save(); if (!quiet && onStartHook) onStartHook(); }
+  let toastT = 0, lastSaved = '';
+  function toast(msg) {
+    const n = document.getElementById('toast'); if (!n) return;
+    n.textContent = msg; n.hidden = false; n.classList.remove('show'); void n.offsetWidth; n.classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => { n.classList.remove('show'); toastT = setTimeout(() => { n.hidden = true; }, 260); }, 3200);
+  }
+  const fmtShort = ms => ms < 60e3 ? Math.max(1, Math.round(ms / 1000)) + ' dtk' : fmtDur(ms);
   function endSession(at, quiet) {
     if (!S.active) return;
     const end = Math.min(at || Date.now(), Date.now());
-    if (end - S.active.start >= 1000) S.sessions.push({ id: 's' + S.active.start.toString(36) + Math.random().toString(36).slice(2, 6), cat: S.active.cat, start: S.active.start, end, dev: DEVICE() });
+    lastSaved = '';
+    if (end - S.active.start >= 1000) {
+      S.sessions.push({ id: 's' + S.active.start.toString(36) + Math.random().toString(36).slice(2, 6), cat: S.active.cat, start: S.active.start, end, dev: DEVICE() });
+      const k = cat(S.active.cat);
+      lastSaved = (k ? k.name : 'Sesi') + ' ' + fmtShort(end - S.active.start) + ' tersimpan';
+      toast('✓ ' + lastSaved);
+    }
     S.active = null; save();
     if (!quiet && onEndHook) onEndHook();
   }
@@ -721,7 +772,7 @@
   const running = () => !!S.active;
   const runElapsed = () => runBefore + (S.active ? Date.now() - S.active.start : 0);
 
-  function setLock(on) { Object.values(modeBtns).forEach(t => t.disabled = on); cdIn.disabled = on || (mode === 'countdown' && runBefore > 0); $('presets').querySelectorAll('button').forEach(b => b.disabled = cdIn.disabled); }
+  function setLock(on) { Object.values(modeBtns).forEach(t => t.disabled = on); cdIn.disabled = on || (mode === 'countdown' && runBefore > 0); $('presets').querySelectorAll('button').forEach(b => b.disabled = cdIn.disabled); $('cdMinus').disabled = $('cdPlus').disabled = cdIn.disabled; }
   // Durasi countdown: "90" = 90 menit, "1:30" = 1 jam 30 menit
   function parseMin(s) {
     s = String(s).trim().replace(',', '.');
@@ -734,6 +785,8 @@
   function syncPresets() { const cur = Math.round(cdLimit / 60000); $('presets').querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.dataset.m === cur)); }
   PRESETS.forEach(m => { const b = el('button', { className: 'preset', textContent: fmtPreset(m), title: m + ' menit' }); b.dataset.m = m;
     b.onclick = () => { if (b.disabled) return; cdIn.value = String(m); readLimit(); render(); }; $('presets').appendChild(b); });
+  function stepCd(d) { if (cdIn.disabled) return; const v = Math.max(1, Math.min(1440, parseMin(cdIn.value) + d)); cdIn.value = String(v); readLimit(); render(); }
+  $('cdMinus').onclick = () => stepCd(-5); $('cdPlus').onclick = () => stepCd(5);
 
   let beforeStartHook = null, starting = false;
   function toggle() {
@@ -758,7 +811,9 @@
   }
   function reset() {
     stopBeepSpam();
+    const had = running();
     if (running()) endSession();
+    if (!had) toast('Kembali ke 0 · sesi sebelumnya tetap tersimpan');
     runBefore = 0; finished = false; readLimit();
     setLock(false); render();
   }
@@ -794,42 +849,28 @@
     const box = $('chips'); box.textContent = '';
     const none = $('noCats');
     none.hidden = list.length > 0;
-    none.textContent = mode === 'category' ? 'Belum ada kategori Istirahat. Tambahkan di tab Kategori.' : 'Belum ada kategori Belajar. Tambahkan di tab Kategori.';
+    none.textContent = mode === 'category' ? 'Belum ada kategori Istirahat. Tambahkan lewat ikon Pengaturan.' : 'Belum ada kategori Belajar. Tambahkan lewat ikon Pengaturan.';
+    $('glabel').textContent = mode === 'category' ? 'Kategori istirahat' : 'Topik belajar';
     if (!list.length) return;
-    const cur = list.find(k => k.id === S.sel) || list[0];
-    const pill = el('button', { className: 'tpill', type: 'button', title: 'Pilih topik' },
-      [dotEl(cur.color), el('span', { className: 'nm', textContent: cur.name }), el('span', { className: 'car', textContent: '▾', 'aria-hidden': 'true' })]);
-    pill.setAttribute('aria-haspopup', 'listbox'); pill.setAttribute('aria-expanded', 'false');
-    const menu = el('div', { className: 'tmenu', hidden: true }); menu.setAttribute('role', 'listbox');
-    const close = () => { menu.hidden = true; pill.setAttribute('aria-expanded', 'false'); document.removeEventListener('pointerdown', away, true); document.removeEventListener('keydown', esc, true); };
-    const away = e => { if (!wrap.contains(e.target)) close(); };
-    const esc = e => { if (e.key === 'Escape') { close(); pill.focus(); } };
-    pill.onclick = () => {
-      if (!menu.hidden) { close(); return; }
-      menu.hidden = false; pill.setAttribute('aria-expanded', 'true');
-      document.addEventListener('pointerdown', away, true); document.addEventListener('keydown', esc, true);
-      const on = menu.querySelector('.opt.on'); if (on) on.scrollIntoView({ block: 'nearest' });
-    };
     list.forEach(k => {
-      const b = el('button', { className: 'opt' + (k.id === S.sel ? ' on' : ''), type: 'button', title: k.type === 'study' ? 'Belajar' : k.type === 'rest' ? 'Istirahat' : 'Diabaikan' },
-        [dotEl(k.color), k.name, k.id === S.sel ? el('span', { className: 'ck', textContent: '✓' }) : null]);
-      b.setAttribute('role', 'option'); b.setAttribute('aria-selected', String(k.id === S.sel));
+      const on = k.id === S.sel;
+      const b = el('button', { className: 'chip' + (on ? ' on' : ''), type: 'button', title: k.type === 'study' ? 'Belajar' : k.type === 'rest' ? 'Istirahat' : 'Diabaikan' }, [el('span', { className: 'dot' }), k.name]);
+      b.style.setProperty('--c', k.color);
+      b.setAttribute('aria-pressed', String(on));
       b.onclick = () => {
-        close();
         if (k.id === S.sel) return;
         const was = running();
         if (was) endSession(undefined, true);
+        const msg = lastSaved;
         S.sel = k.id;
-        if (was) startSession();
+        if (was) { startSession(); if (msg) toast('✓ ' + msg + ' · lanjut ' + k.name); }
         save(); render();
       };
-      menu.appendChild(b);
+      box.appendChild(b);
     });
-    const more = el('button', { className: 'opt more', type: 'button', textContent: 'Kelola kategori…' });
-    more.onclick = () => { close(); setView('cats'); };
-    menu.appendChild(more);
-    const wrap = el('div', { className: 'topicsel' }, [pill, menu]);
-    box.appendChild(wrap);
+    const more = el('button', { className: 'chip manage', type: 'button', textContent: '+ Kelola' });
+    more.title = 'Tambah atau ubah kategori'; more.onclick = () => setView('cats');
+    box.appendChild(more);
   }
 
   function render() {
@@ -842,7 +883,7 @@
     const now = Date.now(), today = dayKey(now);
     const days = perDay(withActive()), t = split(days[today]);
     const c = cat(S.sel) || S.cats[0];
-    let clock, status, over = false;
+    let clock, status, over = false, tl = '', pr = null, pm = '', po = false;
 
     if (mode === 'category') {
       const e = t.by[S.sel] || 0, lim = (c.limit || 0) * M;
@@ -856,6 +897,10 @@
       else status = c.name + (c.type === 'study' && c.limit ? ' · target ' + fmtDur(c.limit * M) : isLimit ? ' · batas ' + fmtDur(lim) : '');
       toggleBtn.textContent = running() ? 'Jeda' : (e > 0 ? 'Lanjutkan' : 'Mulai');
       if (running() && over && now - lastBeep > 900) { lastBeep = now; beepOver(); }
+      tl = cd ? 'Sisa batas istirahat hari ini' : 'Total istirahat hari ini';
+      if (lim) { pr = e / lim; pm = fmtDur(e) + ' dari batas ' + fmtDur(lim) + ' · dijumlah per hari, tidak mulai dari 0'; }
+      else pm = 'Waktu istirahat dijumlah per hari, jadi tidak mulai dari 0';
+      po = over;
     } else {
       if (mode === 'countdown' && running() && runElapsed() >= cdLimit) finishCountdown();
       const e = runElapsed();
@@ -866,10 +911,26 @@
       if (!running() && !finished && remoteHook) { const r = remoteHook(); if (r) status = r; }
       toggleBtn.textContent = finished ? 'Mulai lagi' : running() ? 'Jeda' : (e > 0 ? 'Lanjutkan' : 'Mulai');
       resetBtn.disabled = e === 0 && !finished;
+      if (mode === 'countdown') {
+        tl = finished ? 'Selesai' : 'Sisa waktu';
+        pr = Math.min(1, e / cdLimit); pm = fmtDur(e) + ' berjalan dari ' + fmtDur(cdLimit);
+      } else {
+        tl = 'Sesi ini';
+        const tgt = S.set.target * M;
+        if (c.type === 'study' && c.limit) { const d = t.by[c.id] || 0; pr = d / (c.limit * M); pm = c.name + ' hari ini ' + fmtDur(d) + ' dari ' + fmtDur(c.limit * M); }
+        else if (tgt) { pr = t.study / tgt; pm = 'Belajar hari ini ' + fmtDur(t.study) + ' dari ' + fmtDur(tgt); }
+      }
     }
+    $('tlabel').textContent = tl;
+    $('tprog').hidden = pr == null && !pm;
+    $('tbar').hidden = pr == null;
+    if (pr != null) { $('tbarFill').style.width = Math.min(100, pr * 100) + '%'; $('tbar').classList.toggle('over', po); }
+    $('tmeta').textContent = pm;
     timeEl.textContent = clock;
     statusEl.textContent = status;
-    app.className = 'card timer' + (over || finished ? ' over' : '') + (running() ? ' run' : '');
+    const paused = !running() && !finished && mode !== 'category' && runElapsed() > 0;
+    app.className = 'card timer' + (over || finished ? ' over' : '') + (running() ? ' run' : '') + (paused ? ' paused' : '');
+    toggleBtn.classList.toggle('pause', running());
     document.title = running() ? clock + ' · ' + c.name : DEF_TITLE;
 
     const nt = noticeHook ? noticeHook() : '';
@@ -884,7 +945,17 @@
     const target = S.set.target * M;
     $('todayStudy').innerHTML = '';
     $('todayStudy').append(fmtDur(t.study) + ' ', el('small', { textContent: target ? '/ ' + fmtDur(target) : 'belajar' }));
-    $('todayBar').style.width = (target ? Math.min(100, t.study / target * 100) : 0) + '%';
+    const stack = $('todayStack');
+    const sids = Object.keys(t.by).filter(id => { const k = cat(id) || S.gone[id]; return k && k.type === 'study' && t.by[id] > 0; })
+      .sort((x, y) => S.cats.findIndex(k => k.id === x) - S.cats.findIndex(k => k.id === y));
+    const ssig = sids.map(id => id + (cat(id) || S.gone[id]).color).join(',');
+    if (stack._sig !== ssig) {
+      stack._sig = ssig; stack.textContent = ''; stack._seg = {};
+      sids.forEach(id => { const k = cat(id) || S.gone[id]; const i = el('i', { title: k.name }); i.style.background = k.color; stack._seg[id] = i; stack.appendChild(i); });
+    }
+    const den = Math.max(target, t.study) || 1;
+    sids.forEach(id => { stack._seg[id].style.width = 'calc(' + (t.by[id] / den * 100) + '% - 2px)'; });
+    stack.setAttribute('aria-label', 'Belajar hari ini: ' + (sids.map(id => (cat(id) || S.gone[id]).name + ' ' + fmtDur(t.by[id])).join(', ') || 'belum ada'));
     updateMark(t);
     $('todayMeta').textContent = !target ? 'Target harian belum diatur'
       : t.study >= target ? 'Target harian tercapai · istirahat ' + fmtDur(t.rest)
@@ -896,27 +967,33 @@
     const goneIds = Object.keys(t.by).filter(id => !cat(id) && S.gone[id] && t.by[id] && S.gone[id].type !== 'ignore');
     const sig = S.cats.map(k => [k.id, k.name, k.color, k.type, k.limit].join('|')).join('~') + '#' + goneIds.join(',') + '#' + (S.active ? S.active.cat : '');
     if (rows._sig !== sig) {
-      rows._sig = sig; rows.textContent = ''; rows._vals = {};
+      rows._sig = sig; rows.textContent = ''; rows._vals = {}; rows._bars = {};
       S.cats.forEach(k => {
         const v = el('b'); rows._vals[k.id] = v;
         const on = S.active && S.active.cat === k.id;
         const qp = el('button', { className: 'qp' + (on ? ' on' : ''), type: 'button', textContent: on ? '❚❚' : '▶', title: (on ? 'Jeda ' : 'Mulai ') + k.name });
         qp.setAttribute('aria-label', (on ? 'Jeda ' : 'Mulai ') + k.name);
         qp.onclick = () => quickPlay(k.id);
+        let mb = null;
+        if (k.limit && k.type !== 'ignore') { const fi = el('i'); fi.style.background = k.color; mb = el('div', { className: 'mbar' }, [fi]); rows._bars[k.id] = mb; }
         rows.appendChild(el('div', { className: 'row' }, [
-          el('span', {}, [dotEl(k.color), k.name, el('span', { className: 'tag', textContent: k.type === 'study' ? 'belajar' : k.type === 'rest' ? 'istirahat' : 'diabaikan' })]),
+          el('div', { className: 'rowname' }, [el('span', {}, [dotEl(k.color), k.name, el('span', { className: 'tag', textContent: k.type === 'study' ? 'belajar' : k.type === 'rest' ? 'istirahat' : 'diabaikan' })]), mb]),
           el('div', { className: 'val' }, [v, qp])
         ]));
       });
       goneIds.forEach(id => {
         const g = S.gone[id], v = el('b'); rows._vals[id] = v;
         rows.appendChild(el('div', { className: 'row' }, [
-          el('span', {}, [dotEl(g.color), g.name, el('span', { className: 'tag', textContent: (g.type === 'study' ? 'belajar' : 'istirahat') + ' · dihapus' })]),
-          el('div', { className: 'val' }, [v, el('span', { style: 'width:28px;flex:none' })])
+          el('div', { className: 'rowname' }, [el('span', {}, [dotEl(g.color), g.name, el('span', { className: 'tag', textContent: (g.type === 'study' ? 'belajar' : 'istirahat') + ' · dihapus' })])]),
+          el('div', { className: 'val' }, [v, el('span', { style: 'width:32px;flex:none' })])
         ]));
       });
     }
-    S.cats.forEach(k => { const v = rows._vals[k.id]; if (v) { const s = fmtDur(t.by[k.id] || 0) + lab(k); if (v.textContent !== s) v.textContent = s; } });
+    S.cats.forEach(k => {
+      const v = rows._vals[k.id]; if (v) { const s = fmtDur(t.by[k.id] || 0) + lab(k); if (v.textContent !== s) v.textContent = s; }
+      const mb = rows._bars[k.id];
+      if (mb) { const r = (t.by[k.id] || 0) / (k.limit * M); mb.firstChild.style.width = Math.min(100, r * 100) + '%'; mb.classList.toggle('over', k.type === 'rest' && r > 1); }
+    });
     goneIds.forEach(id => { const v = rows._vals[id]; if (v) { const s = fmtDur(t.by[id]); if (v.textContent !== s) v.textContent = s; } });
   }
 
@@ -1634,7 +1711,7 @@
   // Halaman (tab atas): tidak mengganggu timer yang sedang berjalan
   function setView(next) {
     view = next;
-    for (const m in tabs) tabs[m].setAttribute('aria-selected', String(m === next));
+    for (const m in tabs) tabs[m].setAttribute(m === 'cats' ? 'aria-pressed' : 'aria-selected', String(m === next));
     $('viewTimer').hidden = next !== 'timer';
     $('viewStats').hidden = next !== 'stats';
     $('viewCats').hidden = next !== 'cats';
@@ -1664,6 +1741,19 @@
   tabs.timer.onclick = () => setView('timer');
   tabs.cats.onclick = () => setView('cats');
   tabs.stats.onclick = () => setView('stats');
+  $('toSet').onclick = () => setView('cats');
+  // Pintasan keyboard: Spasi = mulai/jeda, R = kembali ke 0 (hanya di layar Timer, tidak saat mengetik)
+  document.addEventListener('keydown', e => {
+    if (view !== 'timer' || e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+    const a = document.activeElement, tag = a && a.tagName;
+    if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || (a && a.isContentEditable) || document.querySelector('dialog[open]')) return;
+    if (e.code === 'Space' || e.key === ' ') {
+      if (tag === 'BUTTON') return;          // Spasi pada tombol yang difokus tetap menekan tombol itu sendiri
+      e.preventDefault(); if (!toggleBtn.disabled) toggle();
+    } else if (e.key === 'r' || e.key === 'R') {
+      if (!resetBtn.hidden && !resetBtn.disabled) { e.preventDefault(); reset(); }
+    }
+  });
   modeBtns.stopwatch.onclick = () => setMode('stopwatch');
   modeBtns.countdown.onclick = () => setMode('countdown');
   modeBtns.category.onclick = () => setMode('category');
