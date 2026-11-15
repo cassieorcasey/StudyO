@@ -29,6 +29,17 @@ npm run icons   # buat ulang ikon dari src/cadence.js, lalu build
 
 Setiap push menjalankan uji di GitHub Actions. Uji juga memeriksa bahwa `index.html` sudah dibangun ulang dari `src/`.
 
+## Arsitektur (di dalam `src/template.html`)
+
+| Module | Tanggung jawab | Interface |
+|---|---|---|
+| **Hari** | Memecah Sesi per hari (zona Asia/Bangkok, jam pergantian hari) | `dayKey`, `perDay`, `split` |
+| **Kategori** | Kategori aktif dan yang sudah dihapus (tetap dihitung di statistik) | `find`, `group`, `label`, `remove`, `remember` |
+| **Timer** | Satu-satunya pemilik Sesi aktif: mode, jeda, Countdown, pindah topik | `toggle`, `reset`, `setMode`, `setCountdown`, `switchTo`, `cut`, `stoppedBy`, `tick`, `state`, `on` |
+| **Sync** | Sinkron Supabase, dipasang lewat seam `sync` (adapter offline bila belum terpasang) | `changed`, `started`, `ended`, `beforeStart`, `notice`, `remote`, `device` |
+
+Tampilan (`render`, `renderTimerCard`, `renderToday`, `renderStats`) hanya membaca keadaan dan mendengarkan `Timer.on(...)`. Daftar yang berisi tombol memakai `keyed(...)` agar tidak dibangun ulang di tengah klik. `window.StudyO` membuka module inti untuk `tests/timer.js`.
+
 ## Alur mengubah aplikasi
 
 1. Sunting `src/template.html` (atau `src/cadence.js` untuk logo).

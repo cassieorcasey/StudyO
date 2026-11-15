@@ -615,17 +615,43 @@
   try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
   if (!S || S.v !== 2 || !S.cats || !S.cats.length) S = JSON.parse(JSON.stringify(DEFAULT));
   S.set = Object.assign({}, DEFAULT.set, S.set);
-  const cat = id => S.cats.find(c => c.id === id) || null;
-  // Kategori yang dihapus tetap diingat (nama, warna, jenis), supaya riwayatnya tetap dihitung di statistik.
   if (!S.gone || typeof S.gone !== 'object') S.gone = {};
-  const info = id => cat(id) || S.gone[id] || null;
-  const bury = c => { if (c && c.id) S.gone[c.id] = { id: c.id, name: c.name, color: c.color, type: c.type, limit: 0 }; };
+
+  /* ---------- Kategori: termasuk yang sudah dihapus ----------
+     Kategori yang dihapus tetap diingat (nama, warna, jenis) di S.gone, supaya riwayatnya tetap dihitung.
+     Pemanggil memakai module ini dan tidak menyentuh S.gone langsung. */
+  const cat = id => S.cats.find(c => c.id === id) || null;        // hanya kategori yang masih ada
+  const Kategori = {
+    find: id => cat(id) || S.gone[id] || null,                     // termasuk yang sudah dihapus
+    isGone: id => !cat(id) && !!S.gone[id],
+    gone: () => Object.values(S.gone).filter(g => !cat(g.id)),
+    // Break memakai kelompok 'rest'; Stopwatch dan Countdown memakai 'work' (belajar + diabaikan)
+    group: c => c && c.type === 'rest' ? 'rest' : 'work',
+    label: c => ({ study: 'belajar', rest: 'istirahat', ignore: 'diabaikan' })[c.type] + (Kategori.isGone(c.id) ? ' · dihapus' : ''),
+    title: c => ({ study: 'Belajar', rest: 'Istirahat', ignore: 'Diabaikan' })[c.type],
+    remember(c) { if (c && c.id) S.gone[c.id] = { id: c.id, name: c.name, color: c.color, type: c.type, limit: 0 }; },
+    revive(id) { delete S.gone[id]; },
+    remove(k) {
+      Kategori.remember(k);
+      S.cats = S.cats.filter(z => z !== k);
+      if (S.sel === k.id) S.sel = S.cats[0].id;
+    }
+  };
   if (!cat(S.sel)) S.sel = S.cats[0].id;
   if (S.active && !cat(S.active.cat)) S.active = null;
-  let syncHook = null;
+
+  /* ---------- Seam Sync ----------
+     Inti aplikasi hanya bicara ke adapter ini. Sebelum module Sync terpasang dipakai adapter offline;
+     uji bisa memasang adapter sendiri. Adapter: changed, started, ended, beforeStart(go), notice, remote, device. */
+  const OFFLINE = { changed() {}, started() {}, ended() {}, beforeStart(go) { go(); }, notice: () => '', remote: () => '', device: () => null };
+  let sync = OFFLINE;
+
+  // Render berkunci: isi box dibangun ulang hanya bila kuncinya berubah; selain itu pemanggil cukup memperbarui angka.
+  // Dengan begitu tombol di dalamnya tidak diganti di antara tekan dan lepas klik.
+  function keyed(box, key, build) { if (box._key === key) return false; box._key = key; box.textContent = ''; build(box); return true; }
+  const invalidate = box => { box._key = null; };
   /* ---------- Logo "The Cadence Disk": blok kobalt = waktu belajar hari ini terhadap target harian ---------- */
   /*{{CADENCE_JS}}*/
-  let markSig = '';
   function updateMark(tt) {
     const box = document.getElementById('orbit'); if (!box) return;
     const now = Date.now(), days = perDay(withActive());
@@ -635,16 +661,16 @@
     const sweep = pct == null ? 60 : pct * 360;
     let cad = 0;
     for (let i = 0; i < 7; i++) { const d = days[dayKey(now - i * 864e5)]; if (d && split(d).study > 0) cad++; }
-    const sig = Math.round(sweep / 2) + ':' + cad;
-    if (sig === markSig) return; markSig = sig;
-    box.innerHTML = cadenceSVG({ theme: 'light', sweep, id: 'ml', size: 30, ticks: false, bg: false }).replace('<svg ', '<svg class="ol" ') +
+    keyed(box, Math.round(sweep / 2) + ':' + cad, b => {
+      b.innerHTML = cadenceSVG({ theme: 'light', sweep, id: 'ml', size: 30, ticks: false, bg: false }).replace('<svg ', '<svg class="ol" ') +
                     cadenceSVG({ theme: 'dark', sweep, id: 'md', size: 30, ticks: false, bg: false }).replace('<svg ', '<svg class="od" ');
+    });
     box.parentNode.title = (pct == null ? 'Hari ini ' + fmtDur(t.study) + ' belajar' : 'Hari ini ' + fmtDur(t.study) + ' dari ' + fmtDur(target) + ' (' + Math.round(pct * 100) + '%)') +
       ' · Ritme 7 hari: ' + cad + '/7 hari belajar';
   }
 
   function saveLocal() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} try { updateMark(); } catch (e) {} }
-  function save() { saveLocal(); if (syncHook) syncHook(); }
+  function save() { saveLocal(); sync.changed(); }
 
   /* ---------- Hari (zona Asia/Bangkok, ganti pada set.dayStart) ---------- */
   const dayKey = ts => new Date(ts + TZ - S.set.dayStart * H).toISOString().slice(0, 10);
@@ -669,7 +695,7 @@
   const withActive = () => S.active ? S.sessions.concat([{ cat: S.active.cat, start: S.active.start, end: Date.now() }]) : S.sessions;
   function split(dayMap) {   // { study, rest, by }
     let study = 0, rest = 0;
-    for (const id in dayMap || {}) { const c = info(id); if (!c) continue; if (c.type === 'study') study += dayMap[id]; else if (c.type === 'rest') rest += dayMap[id]; }
+    for (const id in dayMap || {}) { const c = Kategori.find(id); if (!c) continue; if (c.type === 'study') study += dayMap[id]; else if (c.type === 'rest') rest += dayMap[id]; }
     return { study, rest, by: dayMap || {} };
   }
 
@@ -687,31 +713,120 @@
   function stopBeepSpam() { if (beepTimer) { clearInterval(beepTimer); beepTimer = null; } }
   function beepOver() { if (!audioCtx) return; try { [0, 0.22].forEach(d => tone('square', 0.15, audioCtx.currentTime + d, 0.15)); } catch (e) {} }
 
-  /* ---------- Sesi aktif ---------- */
-  let onStartHook = null, onEndHook = null;
-  function startSession(quiet) { S.active = { cat: S.sel, start: Date.now(), ok: false }; save(); if (!quiet && onStartHook) onStartHook(); }
-  let toastT = 0, lastSaved = '';
+  /* ---------- Timer: satu-satunya pemilik Sesi aktif dan status putaran ----------
+     Interface: on, state, toggle, reset, setMode, setCountdown, switchTo, cut, stoppedBy, confirmLong, tick.
+     Tombol, chip, ▶, pintasan keyboard, dan Sync hanya memanggil interface ini; tidak ada yang mengubah
+     S.active atau status putaran secara langsung. Tampilan mendengarkan kejadian lewat Timer.on(). */
+  const Timer = (() => {
+    let mode = 'stopwatch';          // stopwatch | countdown | category (Break)
+    let runBefore = 0;               // waktu putaran sebelum jeda terakhir (Stopwatch/Countdown)
+    let cdLimit = 60 * M, finished = false, starting = false;
+    const listeners = [];
+    const emit = (type, data) => listeners.forEach(f => f(type, data || {}));
+    const running = () => !!S.active;
+    const elapsed = () => runBefore + (S.active ? Date.now() - S.active.start : 0);
+
+    function begin() { S.active = { cat: S.sel, start: Date.now(), ok: false }; save(); sync.started(); }
+    // Sesi aktif menjadi Sesi bila panjangnya minimal 1 detik. Hasil: sesi tersimpan, atau null.
+    function close(at) {
+      if (!S.active) return null;
+      const end = Math.min(at || Date.now(), Date.now());
+      let s = null;
+      if (end - S.active.start >= 1000) {
+        s = { id: 's' + S.active.start.toString(36) + Math.random().toString(36).slice(2, 6), cat: S.active.cat, start: S.active.start, end, dev: sync.device() };
+        S.sessions.push(s);
+      }
+      S.active = null; save();
+      return s;
+    }
+    function end(at) { const s = close(at); sync.ended(); if (s) emit('saved', { session: s }); return s; }
+    function pause() { runBefore = elapsed(); end(); }
+
+    const api = {
+      on(f) { listeners.push(f); },
+      state() {
+        const e = elapsed();
+        return {
+          mode, running: running(), starting, finished, elapsed: e, cdLimit,
+          group: mode === 'category' ? 'rest' : 'work',
+          paused: !running() && !finished && mode !== 'category' && e > 0,
+          countdownLocked: running() || (mode === 'countdown' && runBefore > 0)
+        };
+      },
+      toggle() {
+        if (running()) { pause(); emit('change'); return; }
+        if (starting) return;
+        const go = () => {
+          starting = false;
+          if (running()) return;
+          if (finished) { finished = false; runBefore = 0; }
+          begin(); emit('started'); emit('change');
+        };
+        starting = true;
+        Promise.resolve(sync.beforeStart(go)).finally(() => { if (starting) { starting = false; emit('change'); } });
+        if (starting) emit('change');
+      },
+      reset() {
+        const had = running();
+        if (had) end();
+        runBefore = 0; finished = false;
+        emit('reset', { hadRunning: had }); emit('change');
+      },
+      setMode(next, keepRun) {
+        mode = next;
+        if (!keepRun) { runBefore = 0; finished = false; }
+        emit('mode'); emit('change');
+      },
+      setCountdown(min) {
+        if (api.state().countdownLocked) return false;
+        cdLimit = Math.max(1, Math.min(1440, Math.round(min) || 1)) * M;
+        emit('change'); return true;
+      },
+      // Pilih kategori. Bila timer berjalan, sesi lama disimpan dan timer lanjut di kategori baru.
+      // Kategori dari kelompok lain (belajar ↔ istirahat) membuat timer dijeda dan mode berpindah.
+      // opts.start: langsung mulai; opts.toggleSame: kategori yang sedang berjalan dijeda.
+      switchTo(id, opts) {
+        const k = cat(id); if (!k) return;
+        opts = opts || {};
+        if (running() && S.active.cat === id) { if (opts.toggleSame) api.toggle(); return; }
+        const g = Kategori.group(k);
+        const want = g === 'rest' ? 'category' : (mode === 'category' ? 'stopwatch' : mode);
+        if (want !== mode) { if (running()) pause(); api.setMode(want); }
+        if (!S.selBy) S.selBy = {};
+        if (running()) {
+          const s = close();                          // tanpa sync.ended: langsung mulai lagi
+          S.sel = id; S.selBy[g] = id; begin();
+          emit('switched', { session: s, to: k }); emit('change'); return;
+        }
+        S.sel = id; S.selBy[g] = id; save();
+        if (opts.start) api.toggle(); else emit('change');
+      },
+      // Potong sesi panjang pada batas yang diatur pengguna
+      cut(at) { if (!running()) return; end(at); runBefore = 0; emit('change'); },
+      // Perangkat lain mengambil alih: sesi di sini berakhir pada saat perangkat itu mulai
+      stoppedBy(at) { if (!running()) return; end(at); runBefore = 0; finished = false; emit('change'); },
+      confirmLong() { if (S.active) { S.active.ok = true; save(); } emit('change'); },
+      // Dipanggil berkala: Countdown yang waktunya habis disimpan tepat pada batasnya
+      tick() {
+        if (mode !== 'countdown' || !running() || elapsed() < cdLimit) return;
+        end(S.active.start + (cdLimit - runBefore));
+        runBefore = cdLimit; finished = true;
+        emit('finished'); emit('change');
+      }
+    };
+    return api;
+  })();
+  const running = () => !!S.active;
+  const fmtShort = ms => ms < 60e3 ? Math.max(1, Math.round(ms / 1000)) + ' dtk' : fmtDur(ms);
+  const savedText = s => ((Kategori.find(s.cat) || {}).name || 'Sesi') + ' ' + fmtShort(s.end - s.start) + ' tersimpan';
+
+  let toastT = 0;
   function toast(msg) {
     const n = document.getElementById('toast'); if (!n) return;
     n.textContent = msg; n.hidden = false; n.classList.remove('show'); void n.offsetWidth; n.classList.add('show');
     clearTimeout(toastT);
     toastT = setTimeout(() => { n.classList.remove('show'); toastT = setTimeout(() => { n.hidden = true; }, 260); }, 3200);
   }
-  const fmtShort = ms => ms < 60e3 ? Math.max(1, Math.round(ms / 1000)) + ' dtk' : fmtDur(ms);
-  function endSession(at, quiet) {
-    if (!S.active) return;
-    const end = Math.min(at || Date.now(), Date.now());
-    lastSaved = '';
-    if (end - S.active.start >= 1000) {
-      S.sessions.push({ id: 's' + S.active.start.toString(36) + Math.random().toString(36).slice(2, 6), cat: S.active.cat, start: S.active.start, end, dev: DEVICE() });
-      const k = cat(S.active.cat);
-      lastSaved = (k ? k.name : 'Sesi') + ' ' + fmtShort(end - S.active.start) + ' tersimpan';
-      toast('✓ ' + lastSaved);
-    }
-    S.active = null; save();
-    if (!quiet && onEndHook) onEndHook();
-  }
-  let DEVICE = () => null;
 
   /* ---------- Elemen ---------- */
   const app = $('app'), timeEl = $('time'), statusEl = $('status'), toggleBtn = $('toggle'), resetBtn = $('reset');
@@ -720,12 +835,16 @@
   let view = 'timer';
   const cdIn = $('cdIn');
   const PRESETS = [15, 25, 45, 60, 90, 120];
-  let mode = 'stopwatch';
-  let runBefore = 0, cdLimit = 0, finished = false;   // akumulasi per putaran stopwatch/hitung mundur
-  const running = () => !!S.active;
-  const runElapsed = () => runBefore + (S.active ? Date.now() - S.active.start : 0);
 
-  function setLock(on) { Object.values(modeBtns).forEach(t => t.disabled = on); cdIn.disabled = on || (mode === 'countdown' && runBefore > 0); $('presets').querySelectorAll('button').forEach(b => b.disabled = cdIn.disabled); $('cdMinus').disabled = $('cdPlus').disabled = cdIn.disabled; }
+  // Kunci kontrol mengikuti keadaan Timer (dihitung ulang setiap render)
+  function applyLock(st) {
+    Object.values(modeBtns).forEach(b => b.disabled = st.running);
+    cdIn.disabled = st.countdownLocked;
+    $('presets').querySelectorAll('button').forEach(b => b.disabled = st.countdownLocked);
+    $('cdMinus').disabled = $('cdPlus').disabled = st.countdownLocked;
+    const cur = Math.round(st.cdLimit / M);
+    $('presets').querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.dataset.m === cur));
+  }
   // Durasi countdown: "90" = 90 menit, "1:30" = 1 jam 30 menit
   function parseMin(s) {
     s = String(s).trim().replace(',', '.');
@@ -734,139 +853,114 @@
     return isNaN(v) ? 0 : Math.min(1440, Math.round(v));
   }
   const fmtPreset = m => m < 60 ? m + 'm' : m % 60 ? Math.floor(m / 60) + 'j' + (m % 60) : (m / 60) + 'j';
-  function readLimit() { cdLimit = Math.max(1, parseMin(cdIn.value)) * 60000; syncPresets(); }
-  function syncPresets() { const cur = Math.round(cdLimit / 60000); $('presets').querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.dataset.m === cur)); }
+  function setCd(min) { if (Timer.setCountdown(min)) cdIn.value = String(Math.round(Timer.state().cdLimit / M)); }
   PRESETS.forEach(m => { const b = el('button', { className: 'preset', textContent: fmtPreset(m), title: m + ' menit' }); b.dataset.m = m;
-    b.onclick = () => { if (b.disabled) return; cdIn.value = String(m); readLimit(); render(); }; $('presets').appendChild(b); });
-  function stepCd(d) { if (cdIn.disabled) return; const v = Math.max(1, Math.min(1440, parseMin(cdIn.value) + d)); cdIn.value = String(v); readLimit(); render(); }
-  $('cdMinus').onclick = () => stepCd(-5); $('cdPlus').onclick = () => stepCd(5);
+    b.onclick = () => setCd(m); $('presets').appendChild(b); });
+  $('cdMinus').onclick = () => setCd(parseMin(cdIn.value) - 5);
+  $('cdPlus').onclick = () => setCd(parseMin(cdIn.value) + 5);
 
-  let beforeStartHook = null, starting = false;
-  function toggle() {
-    unlock(); stopBeepSpam();
-    if (running()) {
-      runBefore = runElapsed(); endSession();
-      setLock(false); render();
-      return;
-    }
-    if (starting) return;
-    const go = () => {
-      starting = false;
-      if (running()) return;
-      if (finished) { finished = false; runBefore = 0; }
-      if (mode === 'countdown' && runBefore === 0) readLimit();
-      startSession();
-      play(timeEl, 'bump');
-      setLock(true); render();
-    };
-    if (beforeStartHook) { starting = true; toggleBtn.disabled = true; Promise.resolve(beforeStartHook(go)).finally(() => { starting = false; toggleBtn.disabled = false; }); }
-    else go();
-  }
-  function reset() {
-    stopBeepSpam();
-    const had = running();
-    if (running()) endSession();
-    if (!had) toast('Kembali ke 0 · sesi sebelumnya tetap tersimpan');
-    runBefore = 0; finished = false; readLimit();
-    setLock(false); render();
-  }
-  function finishCountdown() {
-    endSession(S.active.start + (cdLimit - runBefore));
-    runBefore = cdLimit; finished = true;
-    setLock(false);
-    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-    startBeepSpam();
-  }
+  // Aksi pengguna: buka kunci audio, hentikan bunyi, lalu teruskan ke Timer
+  const act = f => (...a) => { unlock(); stopBeepSpam(); return f(...a); };
+  const toggle = act(() => Timer.toggle());
+  const reset = act(() => Timer.reset());
+  const quickPlay = act(id => { Timer.switchTo(id, { start: true, toggleSame: true }); if (view !== 'timer') setView('timer'); });
 
-  let remoteHook = null, noticeHook = null;
+  // Tampilan mendengarkan Timer
+  Timer.on((type, d) => {
+    if (type === 'saved') toast('✓ ' + savedText(d.session));
+    else if (type === 'switched') { if (d.session) toast('✓ ' + savedText(d.session) + ' · lanjut ' + d.to.name); }
+    else if (type === 'reset') { if (!d.hadRunning) toast('Kembali ke 0 · sesi sebelumnya tetap tersimpan'); }
+    else if (type === 'started') play(timeEl, 'bump');
+    else if (type === 'finished') { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); startBeepSpam(); }
+    else if (type === 'mode') {
+      const m = Timer.state().mode;
+      for (const k in modeBtns) modeBtns[k].setAttribute('aria-pressed', String(k === m));
+      $('picker').hidden = m !== 'countdown';
+      resetBtn.hidden = m === 'category';
+      invalidate($('chips'));
+    } else if (type === 'change') render();
+  });
 
   /* ---------- Render timer ---------- */
-  let chipSig = '';
-  // Break = kategori istirahat; Stopwatch & Countdown = kategori belajar/diabaikan
-  const groupOf = c => c && c.type === 'rest' ? 'rest' : 'work';
-  const modeGroup = () => mode === 'category' ? 'rest' : 'work';
-  const groupCats = () => S.cats.filter(c => groupOf(c) === modeGroup());
+  const groupCats = () => S.cats.filter(c => Kategori.group(c) === Timer.state().group);
+  // Pilihan kategori tetap di kelompok mode yang aktif; tiap kelompok mengingat pilihan terakhirnya
   function fixSel() {
     if (running()) return;
-    const g = modeGroup(), list = groupCats();
+    const g = Timer.state().group, list = groupCats();
     if (!S.selBy) S.selBy = {};
-    if (cat(S.sel) && groupOf(cat(S.sel)) === g) { S.selBy[g] = S.sel; return; }
+    if (cat(S.sel) && Kategori.group(cat(S.sel)) === g) { S.selBy[g] = S.sel; return; }
     const keep = list.find(c => c.id === S.selBy[g]) || list[0];
     if (keep) { S.sel = keep.id; S.selBy[g] = keep.id; }
   }
   function renderChips() {
-    const list = groupCats();
-    const sig = list.map(k => k.id + k.name + k.color).join('~') + S.sel + mode;
-    if (sig === chipSig) return;
-    chipSig = sig;
-    const box = $('chips'); box.textContent = '';
+    const list = groupCats(), brk = Timer.state().group === 'rest';
     const none = $('noCats');
     none.hidden = list.length > 0;
-    none.textContent = mode === 'category' ? 'Belum ada kategori Istirahat. Tambahkan lewat ikon Pengaturan.' : 'Belum ada kategori Belajar. Tambahkan lewat ikon Pengaturan.';
-    $('glabel').textContent = mode === 'category' ? 'Kategori istirahat' : 'Topik belajar';
-    if (!list.length) return;
-    list.forEach(k => {
-      const on = k.id === S.sel;
-      const b = el('button', { className: 'chip' + (on ? ' on' : ''), type: 'button', title: k.type === 'study' ? 'Belajar' : k.type === 'rest' ? 'Istirahat' : 'Diabaikan' }, [el('span', { className: 'dot' }), k.name]);
-      b.style.setProperty('--c', k.color);
-      b.setAttribute('aria-pressed', String(on));
-      b.onclick = () => {
-        if (k.id === S.sel) return;
-        const was = running();
-        if (was) endSession(undefined, true);
-        const msg = lastSaved;
-        S.sel = k.id;
-        if (was) { startSession(); if (msg) toast('✓ ' + msg + ' · lanjut ' + k.name); }
-        save(); render();
-      };
-      box.appendChild(b);
+    none.textContent = brk ? 'Belum ada kategori Istirahat. Tambahkan lewat ikon Pengaturan.' : 'Belum ada kategori Belajar. Tambahkan lewat ikon Pengaturan.';
+    $('glabel').textContent = brk ? 'Kategori istirahat' : 'Topik belajar';
+    keyed($('chips'), list.map(k => k.id + k.name + k.color).join('~') + '#' + S.sel, box => {
+      if (!list.length) return;
+      list.forEach(k => {
+        const on = k.id === S.sel;
+        const b = el('button', { className: 'chip' + (on ? ' on' : ''), type: 'button', title: Kategori.title(k) }, [el('span', { className: 'dot' }), k.name]);
+        b.style.setProperty('--c', k.color);
+        b.setAttribute('aria-pressed', String(on));
+        b.onclick = act(() => Timer.switchTo(k.id));
+        box.appendChild(b);
+      });
+      const more = el('button', { className: 'chip manage', type: 'button', textContent: '+ Kelola' });
+      more.title = 'Tambah atau ubah kategori'; more.onclick = () => setView('cats');
+      box.appendChild(more);
     });
-    const more = el('button', { className: 'chip manage', type: 'button', textContent: '+ Kelola' });
-    more.title = 'Tambah atau ubah kategori'; more.onclick = () => setView('cats');
-    box.appendChild(more);
   }
 
   function render() {
     if (view === 'stats') return renderStats();
     if (view === 'cats') return;
+    Timer.tick();
     fixSel();
     renderChips();
-    const empty = !groupCats().length && !running();
-    toggleBtn.disabled = empty || starting;
-    const now = Date.now(), today = dayKey(now);
-    const days = perDay(withActive()), t = split(days[today]);
+    const t = split(perDay(withActive())[dayKey(Date.now())]);
+    renderTimerCard(Timer.state(), t);
+    renderToday(t);
+  }
+
+  // Kartu timer: angka, label, status, progres, tombol
+  function renderTimerCard(st, t) {
+    applyLock(st);
+    toggleBtn.disabled = (!groupCats().length && !st.running) || st.starting;
+    const now = Date.now();
     const c = cat(S.sel) || S.cats[0];
+    const remote = !st.running && !st.finished ? sync.remote() : '';
     let clock, status, over = false, tl = '', pr = null, pm = '', po = false;
 
-    if (mode === 'category') {
+    if (st.mode === 'category') {
       const e = t.by[S.sel] || 0, lim = (c.limit || 0) * M;
       const isLimit = c.type === 'rest' && c.limit > 0;
       over = isLimit && e > lim;
       const cd = isLimit && !!c.cd;
       clock = cd ? (over ? '+' + fmtFlex(e - lim) : fmtFlex(lim - e)) : fmtFlex(e);
       if (over) status = (cd ? 'Waktu habis · lewat ' : 'Melewati batas · ') + fmtFlex(e - lim);
-      else if (running()) status = (cd ? 'Mundur · ' : 'Berjalan · ') + c.name;
-      else if (remoteHook && remoteHook()) status = remoteHook();
+      else if (st.running) status = (cd ? 'Mundur · ' : 'Berjalan · ') + c.name;
+      else if (remote) status = remote;
       else status = c.name + (c.type === 'study' && c.limit ? ' · target ' + fmtDur(c.limit * M) : isLimit ? ' · batas ' + fmtDur(lim) : '');
-      toggleBtn.textContent = running() ? 'Jeda' : (e > 0 ? 'Lanjutkan' : 'Mulai');
-      if (running() && over && now - lastBeep > 900) { lastBeep = now; beepOver(); }
+      toggleBtn.textContent = st.running ? 'Jeda' : (e > 0 ? 'Lanjutkan' : 'Mulai');
+      if (st.running && over && now - lastBeep > 900) { lastBeep = now; beepOver(); }
       tl = cd ? 'Sisa batas istirahat hari ini' : 'Total istirahat hari ini';
       if (lim) { pr = e / lim; pm = fmtDur(e) + ' dari batas ' + fmtDur(lim) + ' · dijumlah per hari, tidak mulai dari 0'; }
       else pm = 'Waktu istirahat dijumlah per hari, jadi tidak mulai dari 0';
       po = over;
     } else {
-      if (mode === 'countdown' && running() && runElapsed() >= cdLimit) finishCountdown();
-      const e = runElapsed();
-      clock = fmtHMS(mode === 'stopwatch' ? e : cdLimit - e);
-      if (finished) status = 'Waktu habis';
-      else if (running()) status = (mode === 'stopwatch' ? 'Berjalan · ' : 'Mundur · ') + c.name;
-      else status = e > 0 ? 'Dijeda · ' + c.name : 'Siap · ' + c.name;
-      if (!running() && !finished && remoteHook) { const r = remoteHook(); if (r) status = r; }
-      toggleBtn.textContent = finished ? 'Mulai lagi' : running() ? 'Jeda' : (e > 0 ? 'Lanjutkan' : 'Mulai');
-      resetBtn.disabled = e === 0 && !finished;
-      if (mode === 'countdown') {
-        tl = finished ? 'Selesai' : 'Sisa waktu';
-        pr = Math.min(1, e / cdLimit); pm = fmtDur(e) + ' berjalan dari ' + fmtDur(cdLimit);
+      const e = st.elapsed;
+      clock = fmtHMS(st.mode === 'stopwatch' ? e : st.cdLimit - e);
+      if (st.finished) status = 'Waktu habis';
+      else if (st.running) status = (st.mode === 'stopwatch' ? 'Berjalan · ' : 'Mundur · ') + c.name;
+      else status = remote || (e > 0 ? 'Dijeda · ' + c.name : 'Siap · ' + c.name);
+      toggleBtn.textContent = st.finished ? 'Mulai lagi' : st.running ? 'Jeda' : (e > 0 ? 'Lanjutkan' : 'Mulai');
+      resetBtn.disabled = e === 0 && !st.finished;
+      if (st.mode === 'countdown') {
+        tl = st.finished ? 'Selesai' : 'Sisa waktu';
+        pr = Math.min(1, e / st.cdLimit); pm = fmtDur(e) + ' berjalan dari ' + fmtDur(st.cdLimit);
       } else {
         tl = 'Sesi ini';
         const tgt = S.set.target * M;
@@ -881,89 +975,68 @@
     $('tmeta').textContent = pm;
     timeEl.textContent = clock;
     statusEl.textContent = status;
-    const paused = !running() && !finished && mode !== 'category' && runElapsed() > 0;
-    app.className = 'card timer' + (over || finished ? ' over' : '') + (running() ? ' run' : '') + (paused ? ' paused' : '');
-    toggleBtn.classList.toggle('pause', running());
-    document.title = running() ? clock + ' · ' + c.name : DEF_TITLE;
+    app.className = 'card timer' + (over || st.finished ? ' over' : '') + (st.running ? ' run' : '') + (st.paused ? ' paused' : '');
+    toggleBtn.classList.toggle('pause', st.running);
+    document.title = st.running ? clock + ' · ' + c.name : DEF_TITLE;
 
-    const nt = noticeHook ? noticeHook() : '';
+    const nt = sync.notice();
     $('notice').hidden = !nt; $('notice').textContent = nt;
 
     // Peringatan sesi panjang
     const long = S.active && !S.active.ok && now - S.active.start > S.set.maxH * H;
     $('warn').hidden = !long;
     if (long) $('warnText').textContent = 'Sesi ' + cat(S.active.cat).name + ' sudah berjalan ' + fmtDur(now - S.active.start) + ' tanpa jeda. Masih berlangsung?';
+  }
 
-    // Panel hari ini
+  // Kartu Hari ini: total, bar bertumpuk per topik, dan baris per kategori dengan ▶
+  function renderToday(t) {
     const target = S.set.target * M;
     $('todayStudy').innerHTML = '';
     $('todayStudy').append(fmtDur(t.study) + ' ', el('small', { textContent: target ? '/ ' + fmtDur(target) : 'belajar' }));
     const stack = $('todayStack');
-    const sids = Object.keys(t.by).filter(id => { const k = cat(id) || S.gone[id]; return k && k.type === 'study' && t.by[id] > 0; })
+    const sids = Object.keys(t.by).filter(id => { const k = Kategori.find(id); return k && k.type === 'study' && t.by[id] > 0; })
       .sort((x, y) => S.cats.findIndex(k => k.id === x) - S.cats.findIndex(k => k.id === y));
-    const ssig = sids.map(id => id + (cat(id) || S.gone[id]).color).join(',');
-    if (stack._sig !== ssig) {
-      stack._sig = ssig; stack.textContent = ''; stack._seg = {};
-      sids.forEach(id => { const k = cat(id) || S.gone[id]; const i = el('i', { title: k.name }); i.style.background = k.color; stack._seg[id] = i; stack.appendChild(i); });
-    }
+    keyed(stack, sids.map(id => id + Kategori.find(id).color).join(','), box => {
+      box._seg = {};
+      sids.forEach(id => { const k = Kategori.find(id); const i = el('i', { title: k.name }); i.style.background = k.color; box._seg[id] = i; box.appendChild(i); });
+    });
     const den = Math.max(target, t.study) || 1;
     sids.forEach(id => { stack._seg[id].style.width = 'calc(' + (t.by[id] / den * 100) + '% - 2px)'; });
-    stack.setAttribute('aria-label', 'Belajar hari ini: ' + (sids.map(id => (cat(id) || S.gone[id]).name + ' ' + fmtDur(t.by[id])).join(', ') || 'belum ada'));
+    stack.setAttribute('aria-label', 'Belajar hari ini: ' + (sids.map(id => Kategori.find(id).name + ' ' + fmtDur(t.by[id])).join(', ') || 'belum ada'));
     updateMark(t);
     $('todayMeta').textContent = !target ? 'Target harian belum diatur'
       : t.study >= target ? 'Target harian tercapai · istirahat ' + fmtDur(t.rest)
       : 'Kurang ' + fmtDur(target - t.study) + ' · istirahat ' + fmtDur(t.rest);
-    // Baris dibuat ulang hanya bila daftarnya berubah; selain itu hanya angkanya yang diperbarui,
-    // supaya tombol ▶ tidak diganti di antara tekan dan lepas klik.
+
     const rows = $('rows');
     const lab = k => k.type === 'study' ? (k.limit ? ' / ' + fmtDur(k.limit * M) : '') : k.type === 'rest' ? (k.limit ? ' / batas ' + fmtDur(k.limit * M) : '') : '';
-    const goneIds = Object.keys(t.by).filter(id => !cat(id) && S.gone[id] && t.by[id] && S.gone[id].type !== 'ignore');
-    const sig = S.cats.map(k => [k.id, k.name, k.color, k.type, k.limit].join('|')).join('~') + '#' + goneIds.join(',') + '#' + (S.active ? S.active.cat : '');
-    if (rows._sig !== sig) {
-      rows._sig = sig; rows.textContent = ''; rows._vals = {}; rows._bars = {};
+    const gone = Kategori.gone().filter(g => t.by[g.id] && g.type !== 'ignore');
+    const key = S.cats.map(k => [k.id, k.name, k.color, k.type, k.limit].join('|')).join('~') + '#' + gone.map(g => g.id).join(',') + '#' + (S.active ? S.active.cat : '');
+    keyed(rows, key, box => {
+      box._vals = {}; box._bars = {};
       S.cats.forEach(k => {
-        const v = el('b'); rows._vals[k.id] = v;
-        const on = S.active && S.active.cat === k.id;
-        const qp = el('button', { className: 'qp' + (on ? ' on' : ''), type: 'button', textContent: on ? '❚❚' : '▶', title: (on ? 'Jeda ' : 'Mulai ') + k.name });
-        qp.setAttribute('aria-label', (on ? 'Jeda ' : 'Mulai ') + k.name);
-        qp.onclick = () => quickPlay(k.id);
+        const v = el('b'); box._vals[k.id] = v;
         let mb = null;
-        if (k.limit && k.type !== 'ignore') { const fi = el('i'); fi.style.background = k.color; mb = el('div', { className: 'mbar' }, [fi]); rows._bars[k.id] = mb; }
-        rows.appendChild(el('div', { className: 'row' }, [
-          el('div', { className: 'rowname' }, [el('span', {}, [dotEl(k.color), k.name, el('span', { className: 'tag', textContent: k.type === 'study' ? 'belajar' : k.type === 'rest' ? 'istirahat' : 'diabaikan' })]), mb]),
-          el('div', { className: 'val' }, [v, qp])
+        if (k.limit && k.type !== 'ignore') { const fi = el('i'); fi.style.background = k.color; mb = el('div', { className: 'mbar' }, [fi]); box._bars[k.id] = mb; }
+        box.appendChild(el('div', { className: 'row' }, [
+          el('div', { className: 'rowname' }, [el('span', {}, [dotEl(k.color), k.name, el('span', { className: 'tag', textContent: Kategori.label(k) })]), mb]),
+          el('div', { className: 'val' }, [v, playBtn(k)])
         ]));
       });
-      goneIds.forEach(id => {
-        const g = S.gone[id], v = el('b'); rows._vals[id] = v;
-        rows.appendChild(el('div', { className: 'row' }, [
-          el('div', { className: 'rowname' }, [el('span', {}, [dotEl(g.color), g.name, el('span', { className: 'tag', textContent: (g.type === 'study' ? 'belajar' : 'istirahat') + ' · dihapus' })])]),
+      gone.forEach(g => {
+        const v = el('b'); box._vals[g.id] = v;
+        box.appendChild(el('div', { className: 'row' }, [
+          el('div', { className: 'rowname' }, [el('span', {}, [dotEl(g.color), g.name, el('span', { className: 'tag', textContent: Kategori.label(g) })])]),
           el('div', { className: 'val' }, [v, el('span', { style: 'width:32px;flex:none' })])
         ]));
       });
-    }
+    });
     S.cats.forEach(k => {
       const v = rows._vals[k.id]; if (v) { const s = fmtDur(t.by[k.id] || 0) + lab(k); if (v.textContent !== s) v.textContent = s; }
       const mb = rows._bars[k.id];
       if (mb) { const r = (t.by[k.id] || 0) / (k.limit * M); mb.firstChild.style.width = Math.min(100, r * 100) + '%'; mb.classList.toggle('over', k.type === 'rest' && r > 1); }
     });
-    goneIds.forEach(id => { const v = rows._vals[id]; if (v) { const s = fmtDur(t.by[id]); if (v.textContent !== s) v.textContent = s; } });
-  }
-
-  // Mulai/jeda langsung dari daftar topik (Hari ini, Per topik)
-  function quickPlay(id) {
-    const k = cat(id); if (!k) return;
-    unlock(); stopBeepSpam();
-    if (running() && S.active.cat === id) { toggle(); return; }              // baris yang sedang jalan: jeda
-    const want = groupOf(k) === 'rest' ? 'category' : (mode === 'category' ? 'stopwatch' : mode);
-    if (running() && want !== mode) { runBefore = runElapsed(); endSession(); setLock(false); }   // beda kelompok: jeda dulu
-    if (want !== mode) setMode(want);
-    if (!S.selBy) S.selBy = {};
-    if (running()) { endSession(undefined, true); S.sel = id; S.selBy[groupOf(k)] = id; startSession(); save(); render(); return; }
-    S.sel = id; S.selBy[groupOf(k)] = id; save();
-    if (view !== 'timer') setView('timer');
-    chipSig = ''; render();
-    toggle();
+    gone.forEach(g => { const v = rows._vals[g.id]; if (v) { const s = fmtDur(t.by[g.id]); if (v.textContent !== s) v.textContent = s; } });
   }
 
   /* ---------- Pengaturan kategori ---------- */
@@ -977,8 +1050,7 @@
       const del = el('button', { className: 'sm danger', textContent: '✕', title: 'Hapus kategori', disabled: S.cats.length < 2 || (S.active && S.active.cat === k.id) });
       del.onclick = () => {
         if (!confirmDel(k, del)) return;
-        bury(k); S.cats = S.cats.filter(z => z !== k);
-        if (S.sel === k.id) S.sel = S.cats[0].id;
+        Kategori.remove(k);
         save(); renderSet(); render();
       };
       const ty = el('select', { title: 'Jenis' }, [
@@ -1177,7 +1249,7 @@
   function renderTopics(byCat, nDays, sumR) {
     const box = $('topics'); box.textContent = '';
     const study = S.cats.filter(c => c.type === 'study')
-      .concat(Object.values(S.gone).filter(g => g.type === 'study' && !cat(g.id) && byCat[g.id] > 0).map(g => Object.assign({}, g, { name: g.name + ' (dihapus)' })));
+      .concat(Kategori.gone().filter(g => g.type === 'study' && byCat[g.id] > 0).map(g => Object.assign({}, g, { name: g.name + ' (dihapus)' })));
     if (!study.length) { box.appendChild(el('p', { className: 'empty', textContent: 'Belum ada kategori bertanda Belajar. Atur di tab Kategori.' })); return; }
     study.slice().sort((a, b) => (byCat[b.id] || 0) - (byCat[a.id] || 0)).forEach(c => {
       const ms = byCat[c.id] || 0, tgt = (c.limit || 0) * M * nDays;
@@ -1213,7 +1285,7 @@
       const d = new Date(s.start + TZ);
       const when = HARI[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + BLN[d.getUTCMonth()] + ' · ' + pad(d.getUTCHours()) + '.' + pad(d.getUTCMinutes());
       const sel = el('select', { title: 'Kategori' }, S.cats.map(c => el('option', { value: c.id, textContent: c.name })));
-      if (!cat(s.cat)) sel.appendChild(el('option', { value: s.cat, textContent: (S.gone[s.cat] ? S.gone[s.cat].name + ' ' : '') + '(dihapus)' }));
+      if (!cat(s.cat)) sel.appendChild(el('option', { value: s.cat, textContent: (Kategori.isGone(s.cat) ? Kategori.find(s.cat).name + ' ' : '') + '(dihapus)' }));
       sel.value = s.cat;
       sel.onchange = function () { s.cat = this.value; save(); renderStats(); };
       const dur = el('input', { type: 'number', min: 1, max: 1440, value: Math.max(1, Math.round((s.end - s.start) / M)), title: 'Durasi (menit)', inputMode: 'numeric' });
@@ -1348,7 +1420,7 @@
 
     if (!S.sync.gone1) {
       const old = must(await sb.from('categories').select('*').eq('deleted', true)) || [];
-      old.forEach(r => { if (!cat(r.id)) bury({ id: r.id, name: r.name, color: r.color, type: r.type }); });
+      old.forEach(r => { if (!cat(r.id)) Kategori.remember({ id: r.id, name: r.name, color: r.color, type: r.type }); });
       S.sync.gone1 = true;
     }
 
@@ -1370,11 +1442,11 @@
       const pendingDel = !loc && H_.c[r.id] != null && !first;
       if (dirty || pendingDel) return;
       if (r.deleted) {
-        bury({ id: r.id, name: r.name, color: r.color, type: r.type });
+        Kategori.remember({ id: r.id, name: r.name, color: r.color, type: r.type });
         if (loc && !(S.active && S.active.cat === r.id)) { S.cats.splice(idx, 1); changedNow = true; }
         delete H_.c[r.id]; return;
       }
-      delete S.gone[r.id];
+      Kategori.revive(r.id);
       const nc = { id: r.id, name: r.name, color: r.color, type: r.type, limit: r.limit_min, cd: !!r.countdown, sort: r.sort };
       if (loc) Object.assign(loc, nc); else S.cats.push(nc);
       applied.add(r.id); changedNow = true;
@@ -1448,8 +1520,7 @@
       if (S.active && rs >= S.active.start) {
         // Perangkat lain mulai belakangan: timer di sini berhenti pada saat itu.
         const nm = (cat(S.active.cat) || {}).name || '';
-        endSession(rs);
-        runBefore = 0; finished = false; setLock(false);
+        Timer.stoppedBy(rs);
         Sync.notice = 'Timer ' + nm + ' dihentikan karena diambil alih ' + devName(row.device) + '.';
         Sync.remote = row;
       } else if (S.active) {
@@ -1648,16 +1719,19 @@
   function renderSetIfIdle() { const a = document.activeElement; if (catsChanged && !(a && a.closest && a.closest('#cats'))) { renderSet(); catsChanged = false; } }
   updateAcct();
 
-  DEVICE = () => DEV;
-  syncHook = () => Sync.schedule();
-  onStartHook = () => Sync.onStart();
-  onEndHook = () => Sync.onEnd();
-  beforeStartHook = go => Sync.beforeStart(go);
-  noticeHook = () => Sync.notice;
-  remoteHook = () => {
-    const r = Sync.remote; if (!r || running()) return '';
-    const c = cat(r.cat_id), d = new Date(parseTs(r.started_at) + TZ);
-    return 'Berjalan di ' + devName(r.device) + ' · ' + (c ? c.name : '') + ' sejak ' + pad(d.getUTCHours()) + '.' + pad(d.getUTCMinutes());
+  // Pasang adapter Supabase pada seam Sync
+  sync = {
+    changed: () => Sync.schedule(),
+    started: () => Sync.onStart(),
+    ended: () => Sync.onEnd(),
+    beforeStart: go => Sync.beforeStart(go),
+    notice: () => Sync.notice || '',
+    device: () => DEV,
+    remote() {
+      const r = Sync.remote; if (!r || running()) return '';
+      const c = cat(r.cat_id), d = new Date(parseTs(r.started_at) + TZ);
+      return 'Berjalan di ' + devName(r.device) + ' · ' + (c ? c.name : '') + ' sejak ' + pad(d.getUTCHours()) + '.' + pad(d.getUTCMinutes());
+    }
   };
 
   /* ---------- Mode dan event ---------- */
@@ -1670,27 +1744,17 @@
     $('viewCats').hidden = next !== 'cats';
     if (next === 'stats') { if (!running()) document.title = DEF_TITLE; anim = true; }
     if (next === 'cats') renderSet();
-    chipSig = '';
+    invalidate($('chips'));
     render();
     play($('view' + (next === 'timer' ? 'Timer' : next === 'stats' ? 'Stats' : 'Cats')), 'enter');
   }
   // Mode timer: Stopwatch / Countdown / Break (terkunci saat timer berjalan)
-  function setMode(next, keepRun) {
-    stopBeepSpam();
-    mode = next;
-    for (const m in modeBtns) modeBtns[m].setAttribute('aria-pressed', String(m === next));
-    $('picker').hidden = next !== 'countdown';
-    resetBtn.hidden = next === 'category';
-    if (!keepRun) { runBefore = 0; finished = false; }
-    readLimit(); setLock(running());
-    chipSig = '';
-    render();
-  }
+  function setMode(next) { stopBeepSpam(); Timer.setMode(next); Timer.setCountdown(Math.max(1, parseMin(cdIn.value))); }
 
   toggleBtn.onclick = toggle;
   resetBtn.onclick = reset;
-  $('warnKeep').onclick = () => { if (S.active) { S.active.ok = true; save(); } render(); };
-  $('warnCut').onclick = () => { if (S.active) { endSession(S.active.start + S.set.maxH * H); runBefore = 0; setLock(false); } render(); };
+  $('warnKeep').onclick = () => Timer.confirmLong();
+  $('warnCut').onclick = () => { if (S.active) Timer.cut(S.active.start + S.set.maxH * H); };
   tabs.timer.onclick = () => setView('timer');
   tabs.cats.onclick = () => setView('cats');
   tabs.stats.onclick = () => setView('stats');
@@ -1715,8 +1779,8 @@
   $('prev').onclick = () => { anim = true; offset--; renderStats(); };
   $('next').onclick = () => { if (offset < 0) { offset++; anim = true; }; renderStats(); };
   $('useSample').onchange = function () { S.sample = this.checked; anim = true; save(); renderStats(); };
-  cdIn.oninput = () => { cdIn.value = cdIn.value.replace(/[^\d:.,]/g, ''); if (!running() && runBefore === 0) { readLimit(); render(); } };
-  cdIn.onchange = () => { if (!running() && runBefore === 0) { const m = Math.max(1, parseMin(cdIn.value)); cdIn.value = String(m); readLimit(); render(); } };
+  cdIn.oninput = () => { cdIn.value = cdIn.value.replace(/[^\d:.,]/g, ''); Timer.setCountdown(Math.max(1, parseMin(cdIn.value))); };
+  cdIn.onchange = () => setCd(Math.max(1, parseMin(cdIn.value)));
   window.addEventListener('pagehide', saveLocal);
 
   // Sesi yang masih aktif dari kunjungan sebelumnya dilanjutkan (waktu tetap dihitung).
@@ -1727,12 +1791,12 @@
     else if ((S.active && Date.now() - lastStatsAt > 5000) || dayKey(Date.now()) !== lastStatsDay) { lastStatsAt = Date.now(); lastStatsDay = dayKey(Date.now()); if ((!document.activeElement || !document.activeElement.closest('.hist, details')) && !document.querySelector('#viewStats .qp:hover, #viewStats .x:hover, #viewStats .more button:hover')) renderStats(); }
   }, 250);
 
-  readLimit();
   renderSet();
-  // Sesi aktif dari kunjungan sebelumnya: buka mode yang sesuai jenis kategorinya
-  setMode(S.active && groupOf(cat(S.active.cat)) === 'rest' ? 'category' : 'stopwatch');
-  if (S.active && groupOf(cat(S.active.cat)) !== 'rest') runBefore = 0;
+  // Sesi aktif dari kunjungan sebelumnya dilanjutkan di mode yang sesuai jenis kategorinya
+  setMode(S.active && Kategori.group(cat(S.active.cat)) === 'rest' ? 'category' : 'stopwatch');
   setView('timer');
+  // Permukaan uji: interface module inti, hanya dibaca dan dipanggil oleh tests/
+  window.StudyO = Object.freeze({ Timer, Kategori, Hari: Object.freeze({ dayKey, perDay, split }), setSync: a => { sync = Object.assign({}, OFFLINE, a); } });
   updateMark(); setInterval(() => updateMark(), 60000);
 })();
 </script>
