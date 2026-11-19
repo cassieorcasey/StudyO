@@ -251,7 +251,6 @@
   .big small { font-size: 19px; color: var(--soft); font-weight: 500; letter-spacing: 0; }
   .bar { height: 8px; border-radius: 4px; background: var(--seg); overflow: hidden; margin: 10px 0 4px; }
   .bar i { display: block; height: 100%; background: var(--accent); border-radius: 4px; transition: width .3s; }
-  .bar.restbar i { background: var(--rest); }
   .bar.stack { display: flex; gap: 2px; background: var(--seg); }
   .bar.stack i { border-radius: 0; flex: none; transition: width .4s cubic-bezier(.2,.8,.2,1); }
   .bar.stack i:first-child { border-radius: 4px 0 0 4px; }
@@ -1310,7 +1309,7 @@
     const den = Math.max(target, t.study) || 1;
     sids.forEach(id => { stack._seg[id].style.width = 'calc(' + (t.by[id] / den * 100) + '% - 2px)'; });
     stack.setAttribute('aria-label', 'Belajar hari ini: ' + (sids.map(id => Kategori.find(id).name + ' ' + fmtDur(t.by[id])).join(', ') || 'belum ada'));
-    updateMark(t);
+    updateMark();
     $('todayMeta').textContent = !target ? 'Target harian belum diatur'
       : t.study >= target ? 'Target harian tercapai · istirahat ' + fmtDur(t.rest)
       : 'Kurang ' + fmtDur(target - t.study) + ' · istirahat ' + fmtDur(t.rest);
@@ -1708,7 +1707,6 @@
       if (again) { again = false; Sync.schedule(400); }
     }
   }
-  Sync.now = syncNow;
 
   async function pullTable(t) {
     let q = sb.from(t).select('*');
