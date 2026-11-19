@@ -1,12 +1,12 @@
-const {APP,MOCK,shot}=require('./_app');
+const {TIMER:APP,MOCK,shot}=require('./_app');
 const {chromium, devices}=require('playwright');
 const fs=require('fs');
-const db={settings:[],categories:[],sessions:[],active_timer:[]}; let clock=0; const pages=[];
+const db={settings:[],categories:[],sessions:[],active_timer:[],notes:[]}; let clock=0; const pages=[];
 const ts=()=>{ clock++; const d=new Date(Date.now()+clock); return d.toISOString().replace('Z','')+ '123+00:00'.slice(0,9).replace(/^/,'') ; };
 const nowTs=()=>{ const d=new Date(); return d.toISOString().slice(0,23)+'456+00:00'; };
 const key=(t,r)=> t==='settings'||t==='active_timer' ? r.user_id : r.user_id+'|'+r.id;
 function handle(o){
-  const rows=db[o.t]; let out=rows.filter(r=>r.user_id===o.uid);
+  const rows=db[o.t]; if(!rows) return {data:null,error:{code:'PGRST205',message:"Could not find the table 'public."+o.t+"' in the schema cache"}}; let out=rows.filter(r=>r.user_id===o.uid);
   const flt=(list)=>list.filter(r=>o.f.every(([op,c,v])=> op==='eq'?r[c]===v : op==='in'?v.includes(r[c]) : op==='gte'? Date.parse(r[c].replace(/(\.\d{3})\d+/,'$1'))>=Date.parse(v) : true));
   if(o.op==='select'){ out=flt(out); return {data:o.single?(out[0]||null):out,error:null}; }
   if(o.op==='upsert'){ for(const r of o.rows){ if(r.user_id!==o.uid) return {data:null,error:{message:'RLS violation'}};
@@ -87,6 +87,15 @@ const ok=(c,m)=>console.log((c?'PASS ':'FAIL ')+m);
   await A.screenshot({path:shot('sync-stats.png'),fullPage:true});
   await A.click('#acct'); await A.waitForTimeout(300); await A.screenshot({path:shot('sync-dlg.png')});
   await B.click('#tabTimer'); await B.click('#acct'); await B.waitForTimeout(300); await B.screenshot({path:shot('sync-dlg-phone.png')});
+  // catatan hasil: A mencatat, B menerima, B menghapus, A ikut terhapus
+  await A.keyboard.press('Escape'); await A.click('#tabLog'); await A.click('#kinds .kind:has-text("Rangkuman")'); await A.fill('#logText','Rangkuman PCA'); await A.click('#logSave'); await A.waitForTimeout(2500);
+  ok(db.notes.length===1 && db.notes[0].kind==='rangkuman' && db.notes[0].body==='Rangkuman PCA','A: catatan hasil terkirim ke server');
+  await B.keyboard.press('Escape'); await B.evaluate(()=>document.dispatchEvent(new Event('visibilitychange'))); await B.waitForTimeout(2000); await B.click('#tabProg'); await B.waitForTimeout(300);
+  ok((await B.textContent('#progTopics')).includes('Rangkuman PCA'),'B: catatan dari A muncul di Progres');
+  const bx=B.locator('#progTopics .note .x').first(); await bx.click(); await bx.click(); await B.waitForTimeout(2500);
+  ok(db.notes[0].deleted===true,'Server: catatan ditandai terhapus');
+  await A.evaluate(()=>document.dispatchEvent(new Event('visibilitychange'))); await A.waitForTimeout(2000);
+  ok((await A.evaluate(()=>JSON.parse(localStorage.getItem('study_break_v2')).notes.length))===0,'A: penghapusan catatan dari B ikut terhapus');
   // offline: lib missing
   const c=await b.newContext({viewport:{width:1366,height:768}}); await c.route(/cdn\.jsdelivr\.net/,r=>r.abort());
   const C=await c.newPage(); const errs=[]; C.on('pageerror',e=>errs.push(e.message)); await C.goto(APP); await C.waitForTimeout(300);

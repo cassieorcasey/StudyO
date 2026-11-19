@@ -1,4 +1,4 @@
-const {APP,MOCK,shot}=require('./_app');
+const {TIMER:APP,MOCK,shot}=require('./_app');
 const {chromium}=require('playwright');const ok=(c,m)=>console.log((c?'PASS ':'FAIL ')+m);
 (async()=>{const b=await chromium.launch();const H=3600e3,now=Date.now();
 const mk=async(sess,scheme,target=180)=>{const c=await b.newContext({viewport:{width:1366,height:768},colorScheme:scheme,deviceScaleFactor:3});
@@ -7,14 +7,12 @@ const mk=async(sess,scheme,target=180)=>{const c=await b.newContext({viewport:{w
  const p=await c.newPage();p.errs=[];p.on('pageerror',e=>p.errs.push(e.message));await p.goto(APP);await p.waitForTimeout(500);return p;};
 const S=(cat,h,ago)=>({id:cat+ago+h,cat,start:now-ago*H-h*H,end:now-ago*H});
 let p=await mk([S('a',1.5,0.2),S('m',3,0.1),S('a',1,26),S('a',1,50)],'light');
-let t=await p.getAttribute('.brand','title');ok(/1j 30m dari 3j \(50%\)/.test(t),'tooltip progres hari ini (istirahat tidak dihitung): '+t);
-ok(/Ritme 7 hari: 3\/7/.test(t),'ritme 7 hari dihitung');
-await p.locator('.brand').screenshot({path:shot('mark-50.png')});
-p=await mk([S('a',4,0.2)],'light');ok((await p.getAttribute('.brand','title')).includes('100%'),'target tercapai = 100%');
+const svgA=await p.innerHTML('#orbit');ok(/<svg class="ol"/.test(svgA)&&/<svg class="od"/.test(svgA),'logo: varian terang dan gelap');
+await p.locator('.brand').screenshot({path:shot('mark-static.png')});
+p=await mk([S('a',4,0.2)],'light');ok((await p.innerHTML('#orbit'))===svgA,'logo statis: tidak berubah mengikuti jam belajar');
 p=await mk([S('a',1,0.2)],'dark');ok(await p.isVisible('#orbit svg.od')&&!(await p.isVisible('#orbit svg.ol')),'mode gelap memakai varian gelap');
 await p.locator('.brand').screenshot({path:shot('mark-dark.png')});
-p=await mk([],'light',0);ok((await p.getAttribute('.brand','title')).startsWith('Hari ini 0m belajar'),'tanpa target: blok 60° statis');
-// berjalan: logo ikut bertambah
+// timer berjalan: angka dan wordmark
 p=await mk([S('a',1.49,0.2)],'light');const t0=await p.getAttribute('.brand','title');
 await p.click('#toggle');await p.waitForTimeout(1200);
 await p.evaluate(()=>{const s=JSON.parse(localStorage.getItem('study_break_v2'));});

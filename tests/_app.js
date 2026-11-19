@@ -7,3 +7,5 @@ module.exports = {
   MOCK: fs.readFileSync(path.join(__dirname, 'mock-sb.js'), 'utf8'),
   shot: name => path.join(OUT, name)
 };
+// Uji lama untuk mesin timer membuka layar Timer langsung (layar pertama aplikasi sekarang Catat)
+module.exports.TIMER = module.exports.APP + '#timer';

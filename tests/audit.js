@@ -1,4 +1,4 @@
-const {APP,MOCK,shot}=require('./_app');
+const {TIMER:APP,MOCK,shot}=require('./_app');
 const {chromium,devices}=require('playwright');const ok=(c,m)=>console.log((c?'PASS ':'FAIL ')+m);
 (async()=>{const b=await chromium.launch();const H=3600e3,now=Date.now();
 const sess=[];for(let i=0;i<12;i++)sess.push({id:'s'+i,cat:i%2?'mat':'git',start:now-(i+1)*30*H-0.5*H,end:now-(i+1)*30*H});

@@ -1,4 +1,4 @@
-const {APP,MOCK,shot}=require('./_app');
+const {TIMER:APP,MOCK,shot}=require('./_app');
 const {chromium, devices}=require('playwright');
 const fs=require('fs');
 const db={settings:[],categories:[],sessions:[],active_timer:[]}; let clock=0; const pages=[];
@@ -6,7 +6,7 @@ const ts=()=>{ clock++; const d=new Date(Date.now()+clock); return d.toISOString
 const nowTs=()=>{ const d=new Date(); return d.toISOString().slice(0,23)+'456+00:00'; };
 const key=(t,r)=> t==='settings'||t==='active_timer' ? r.user_id : r.user_id+'|'+r.id;
 function handle(o){
-  const rows=db[o.t]; let out=rows.filter(r=>r.user_id===o.uid);
+  const rows=db[o.t]; if(!rows) return {data:null,error:{code:'PGRST205',message:"Could not find the table 'public."+o.t+"' in the schema cache"}}; let out=rows.filter(r=>r.user_id===o.uid);
   const flt=(list)=>list.filter(r=>o.f.every(([op,c,v])=> op==='eq'?r[c]===v : op==='in'?v.includes(r[c]) : op==='gte'? Date.parse(r[c].replace(/(\.\d{3})\d+/,'$1'))>=Date.parse(v) : true));
   if(o.op==='select'){ out=flt(out); return {data:o.single?(out[0]||null):out,error:null}; }
   if(o.op==='upsert'){ for(const r of o.rows){ if(r.user_id!==o.uid) return {data:null,error:{message:'RLS violation'}};
@@ -34,7 +34,7 @@ const ok=(c,m)=>console.log((c?'PASS ':'FAIL ')+m);
   await A.evaluate(s=>{localStorage.setItem('study_break_v2',s);Storage.prototype.setItem=()=>{};},JSON.stringify(st)); await A.reload(); await A.waitForTimeout(400);
   const rowsBefore=await A.textContent('#rows');
   await A.click('#acct'); await A.fill('#dlgBody input[autocomplete=username]','me@test.id'); await A.fill('#dlgBody input[type=password]','rahasia123'); await A.click('text=Masuk dengan kata sandi'); await A.waitForTimeout(2500); await A.keyboard.press('Escape');
-  console.log('DBG server',JSON.stringify(db.categories.map(c=>c.id)), await A.textContent('#acct'));
+  ok((await A.textContent('#acct'))==='Tersinkron','Tabel notes belum ada di server: sinkron sesi dan kategori tetap berhasil');
   // hapus Git
   await A.click('#tabKat'); const del=A.locator('#cats button[title="Hapus kategori"]').nth(1); await del.click(); await del.click(); await A.waitForTimeout(2500);
   ok(!(await A.locator('#cats input[type=text]').evaluateAll(e=>e.map(x=>x.value))).includes('Git'),'A: Git terhapus dari daftar kategori');

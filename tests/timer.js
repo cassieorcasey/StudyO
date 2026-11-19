@@ -1,4 +1,4 @@
-const {APP,MOCK}=require('./_app');
+const {TIMER:APP,MOCK}=require('./_app');
 // Uji interface module inti (Timer, Kategori, Hari) lewat window.StudyO, dengan jam palsu.
 const {chromium}=require('playwright');const ok=(c,m)=>console.log((c?'PASS ':'FAIL ')+m);
 const T0=Date.parse('2026-11-16T03:00:00Z');          // Senin 10.00 WIB

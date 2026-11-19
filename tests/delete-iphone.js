@@ -1,4 +1,4 @@
-const {APP}=require('./_app');
+const {TIMER:APP}=require('./_app');
 // Regresi: di Safari iPhone tombol tidak mendapat fokus saat diketuk. Dulu ketukan ✕ pertama mengganti isi seluruh halaman.
 const {chromium,devices}=require('playwright');const ok=(c,m)=>console.log((c?'PASS ':'FAIL ')+m);
 (async()=>{const b=await chromium.launch();const c=await b.newContext({...devices['iPhone 13']});const p=await c.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));

@@ -1,4 +1,4 @@
-const {APP,shot}=require('./_app');
+const {TIMER:APP,shot}=require('./_app');
 // Regresi: saat timer berjalan, render ulang berkala tidak boleh memutar ulang animasi masuk Statistik.
 const {chromium}=require('playwright');const ok=(c,m)=>console.log((c?'PASS ':'FAIL ')+m);
 (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1600,height:900}});

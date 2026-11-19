@@ -168,6 +168,75 @@
   .gear { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; border: 0; background: none; color: var(--soft); flex: none; }
   .gear:hover, .gear[aria-pressed="true"] { background: var(--seg); color: var(--ink); }
   .gear svg { width: 20px; height: 20px; }
+  .tools { display: flex; align-items: center; gap: 2px; flex: none; }
+  .tbtn { gap: 6px; }
+  .tbtn span:empty { display: none; }
+  .tbtn span { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: 0; }
+  .tbtn.live { display: inline-flex; width: auto; padding: 0 12px 0 9px; border-radius: 999px; color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+  .tbtn.live.done { color: var(--warn); background: var(--amber-bg); }
+  .tbtn.live svg { width: 18px; height: 18px; }
+
+  /* ---------- Catat ---------- */
+  .log { display: flex; flex-direction: column; }
+  .lhead { margin-bottom: 22px; }
+  .log .glabel { margin: 0 0 8px; }
+  .glabel .opt { font-weight: 400; color: var(--faint); }
+  .chips.left { justify-content: flex-start; max-width: none; margin-bottom: 18px; }
+  .kinds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 18px; }
+  .kind {
+    display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 14px; text-align: left;
+    border-radius: 14px; border: 0; background: var(--seg); color: var(--ink); font-size: 15px; font-weight: 500;
+  }
+  .kind svg { width: 20px; height: 20px; flex: none; color: var(--soft); }
+  .kind:not([aria-pressed="true"]):hover { background: var(--seg-on); box-shadow: 0 0 0 1px var(--line); }
+  .kind[aria-pressed="true"] { background: var(--ink); color: var(--page); font-weight: 600; }
+  .kind[aria-pressed="true"] svg { color: var(--page); }
+  @media (max-width: 430px) {
+    .kind { padding: 0 10px 0 12px; gap: 8px; font-size: 14.5px; letter-spacing: -0.02em; white-space: nowrap; }
+    .kind svg { width: 18px; height: 18px; }
+  }
+  @media (max-width: 360px) {
+    .card.log { padding-left: 18px; padding-right: 18px; }
+    .kind svg { display: none; }
+    .logopt { column-gap: 12px; }
+    .log .logopt input.field[type=number] { width: 60px; }
+    .nav-in { column-gap: 6px; }
+    .brand { gap: 8px; }
+    .brand b { font-size: 17px; }
+    .tools .gear { width: 32px; height: 32px; }
+    .acct { padding: 5px 10px; }
+  }
+  .logtext { width: 100%; }
+  .logopt { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 12px 0 18px; }
+  .logopt input.field[type=number] { width: 84px; }
+  .fromtimer { font-size: 13px; color: var(--accent); margin: -8px 0 14px; }
+  .logsave { flex: none; width: 100%; }
+  .loghint { font-size: 13px; color: var(--soft); text-align: center; margin: 8px 0 0; min-height: 18px; }
+  .ask { margin-top: 18px; }
+
+  /* Daftar catatan */
+  .notes { margin-top: 6px; }
+  .note { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+  .note:first-child { border-top: 0; }
+  .note .nt { display: flex; align-items: baseline; gap: 8px; min-width: 0; font-size: 15px; }
+  .note .kb { flex: none; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--seg); color: var(--soft); white-space: nowrap; }
+  .note .tx { min-width: 0; overflow-wrap: anywhere; }
+  .note .nm { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 13px; color: var(--soft); min-width: 0; }
+  .note .x { width: 32px; height: 32px; border-radius: 50%; border: 0; background: none; color: var(--faint); font-size: 13px; flex: none; }
+  .note .x:hover, .note .x:focus-visible { background: var(--danger-bg); color: var(--danger); }
+  .note .x.armed { width: auto; padding: 0 12px; border-radius: 999px; background: var(--danger); color: #fff; font-size: 13px; font-weight: 600; }
+  .note .dot { width: 8px; height: 8px; }
+
+  /* ---------- Progres ---------- */
+  .sumline { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 16px; font-size: 14px; color: var(--soft); }
+  .sumline .sk { display: inline-flex; align-items: baseline; gap: 6px; padding: 7px 14px; border-radius: 999px; background: var(--card); color: var(--ink); box-shadow: var(--card-edge); }
+  .sumline .sk b { font-variant-numeric: tabular-nums; }
+  .ptopics { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  .tcard h3 { display: flex; align-items: center; gap: 10px; margin: 0 0 4px; }
+  .tcard h3 .dot { width: 10px; height: 10px; }
+  .tcard .tsub { font-size: 13px; color: var(--soft); margin: 0 0 6px; }
+  .tcard .more { border-top: 1px solid var(--line); }
+  .pfoot { text-align: center; margin-top: 20px; }
   .linkbtn { border: 0; background: none; padding: 0; color: var(--accent); font-size: 14px; }
   .linkbtn:hover { text-decoration: underline; }
   .warnbox {
@@ -294,6 +363,7 @@
     .grid.two { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: stretch; }
     .grid.stats { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: start; }
     .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-column: 1 / -1; }
+    .ptopics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .card { padding: 32px; }
     .timer { min-height: 440px; }
   }
@@ -312,8 +382,9 @@
   }
   /* Portrait / layar sempit: tab pindah ke bawah judul */
   @media (max-width: 639px), (orientation: portrait) {
-    .nav-in { flex-wrap: wrap; padding-top: 8px; padding-bottom: 10px; row-gap: 10px; }
-    .acct { order: 1; margin-left: auto; }
+    .nav-in { flex-wrap: wrap; padding-top: 8px; padding-bottom: 10px; row-gap: 10px; column-gap: 8px; }
+    .tools { order: 1; margin-left: auto; }
+    .acct { order: 1; }
     .tabs { margin-left: 0; width: 100%; order: 2; }
     .tabs button { flex: 1; padding: 6px 4px; }
     .shead h2 { font-size: 32px; }
@@ -404,19 +475,67 @@
       <b>StudyO</b>
     </div>
     <nav class="tabs" role="tablist" aria-label="Halaman">
-      <button id="tabTimer" role="tab" aria-selected="true">Timer</button>
-      <button id="tabSt" role="tab" aria-selected="false">Statistik</button>
+      <button id="tabLog" role="tab" aria-selected="true">Catat</button>
+      <button id="tabProg" role="tab" aria-selected="false">Progres</button>
     </nav>
-    <button class="gear" id="tabKat" type="button" aria-pressed="false" aria-label="Pengaturan" title="Pengaturan: target harian dan kategori">
+    <div class="tools">
+    <button class="gear tbtn" id="tabTimer" type="button" aria-pressed="false" aria-label="Timer" title="Timer (opsional)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9.5 2.5h5M12 2.5V5"/></svg><span id="navTime"></span>
+    </button>
+    <button class="gear" id="tabSt" type="button" aria-pressed="false" aria-label="Statistik" title="Statistik jam belajar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20.5h18M6.5 17v-5M12 17V6.5M17.5 17v-8"/></svg>
+    </button>
+    <button class="gear" id="tabKat" type="button" aria-pressed="false" aria-label="Pengaturan" title="Pengaturan: topik dan timer">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
+    </div>
     <button class="acct" id="acct">Masuk</button>
   </div>
 </header>
 
 <main>
+  <!-- ============ Catat: layar pertama ============ -->
+  <section id="viewLog" class="grid two">
+    <form class="card log" id="logForm" autocomplete="off">
+      <p class="eyebrow">Catat hasil</p>
+      <h2 class="lhead">Apa yang kamu pahami?</h2>
+      <p class="glabel" id="logCatLbl">Topik</p>
+      <div class="chips left" id="logCats" role="group" aria-labelledby="logCatLbl"></div>
+      <p class="empty" id="logNoCats" hidden>Belum ada topik belajar. <button class="linkbtn" id="logToSet" type="button">Tambah di Pengaturan</button></p>
+      <p class="glabel" id="kindLbl">Jenis hasil</p>
+      <div class="kinds" id="kinds" role="group" aria-labelledby="kindLbl"></div>
+      <label class="glabel" for="logText">Satu kalimat <span class="opt">opsional</span></label>
+      <input class="field logtext" id="logText" type="text" maxlength="140" enterkeyhint="done" placeholder="Misalnya: paham kenapa eigenvector tidak berubah arah">
+      <div class="logopt">
+        <label class="lbl">Jumlah <input class="field" id="logN" type="number" min="1" max="9999" inputmode="numeric" placeholder="–"></label>
+        <label class="lbl">Menit <input class="field" id="logMin" type="number" min="1" max="1440" inputmode="numeric" placeholder="–"></label>
+      </div>
+      <p class="fromtimer" id="logFrom" hidden></p>
+      <button class="pill primary logsave" id="logSave" type="submit" disabled>Simpan</button>
+      <p class="loghint" id="logHint">Pilih jenis hasil untuk menyimpan</p>
+    </form>
+
+    <div class="card">
+      <p class="eyebrow">Hari ini</p>
+      <div class="notes" id="logToday"></div>
+    </div>
+  </section>
+
+  <!-- ============ Progres: linimasa hasil per topik ============ -->
+  <section id="viewProg" hidden>
+    <div class="shead">
+      <div>
+        <p class="eyebrow">Hasil belajar per topik</p>
+        <h2>Progres</h2>
+      </div>
+    </div>
+    <div class="sumline" id="progSum"></div>
+    <div class="ptopics" id="progTopics"></div>
+    <p class="hint pfoot"><button class="linkbtn" id="toStats" type="button">Lihat jam belajar di Statistik</button></p>
+  </section>
+
   <!-- ============ Timer (3 mode) ============ -->
-  <section id="viewTimer" class="grid two">
+  <section id="viewTimer" class="grid two" hidden>
     <div class="card timer" id="app">
       <div class="seg modes" role="group" aria-label="Mode timer">
         <button id="mSw" aria-pressed="true">Stopwatch</button>
@@ -445,6 +564,13 @@
         <button class="pill" id="reset" disabled title="Angka kembali ke 0. Sesi yang sudah dijeda tetap tersimpan.">Kembali ke 0</button>
       </div>
       <p class="kbd" id="kbd"><kbd>Spasi</kbd> mulai atau jeda · <kbd>R</kbd> kembali ke 0</p>
+      <div class="warnbox ask" id="logAsk" hidden>
+        <p id="logAskText"></p>
+        <div class="controls">
+          <button class="pill primary" id="logAskGo" type="button">Catat hasil</button>
+          <button class="pill" id="logAskLater" type="button">Nanti</button>
+        </div>
+      </div>
       <div class="warnbox" id="warn" hidden>
         <p id="warnText"></p>
         <div class="controls">
@@ -475,7 +601,7 @@
   <section id="viewCats" hidden>
     <div class="shead">
       <div>
-        <p class="eyebrow">Target harian dan kategori</p>
+        <p class="eyebrow">Topik, timer, dan statistik jam</p>
         <h2>Pengaturan</h2>
       </div>
     </div>
@@ -609,13 +735,15 @@
       { id: 'main', name: 'Main', color: '#86868b', type: 'rest', limit: 30 },
       { id: 'rest', name: 'Istirahat', color: '#c7c7cc', type: 'rest', limit: 5, cd: true }
     ],
-    sel: 'mat', sessions: [], active: null, sample: true
+    sel: 'mat', sessions: [], notes: [], active: null, sample: true
   };
   let S;
   try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
   if (!S || S.v !== 2 || !S.cats || !S.cats.length) S = JSON.parse(JSON.stringify(DEFAULT));
   S.set = Object.assign({}, DEFAULT.set, S.set);
   if (!S.gone || typeof S.gone !== 'object') S.gone = {};
+  if (!Array.isArray(S.notes)) S.notes = [];
+  if (!S.drafts || typeof S.drafts !== 'object') S.drafts = {};
 
   /* ---------- Kategori: termasuk yang sudah dihapus ----------
      Kategori yang dihapus tetap diingat (nama, warna, jenis) di S.gone, supaya riwayatnya tetap dihitung.
@@ -650,24 +778,50 @@
   // Dengan begitu tombol di dalamnya tidak diganti di antara tekan dan lepas klik.
   function keyed(box, key, build) { if (box._key === key) return false; box._key = key; box.textContent = ''; build(box); return true; }
   const invalidate = box => { box._key = null; };
-  /* ---------- Logo "The Cadence Disk": blok kobalt = waktu belajar hari ini terhadap target harian ---------- */
+  /* ---------- Logo "The Cadence Disk": statis, blok aksen 60°. Tidak lagi mengukur jam belajar. ---------- */
   /*{{CADENCE_JS}}*/
-  function updateMark(tt) {
+  function updateMark() {
     const box = document.getElementById('orbit'); if (!box) return;
-    const now = Date.now(), days = perDay(withActive());
-    const t = tt || split(days[dayKey(now)]);
-    const target = S.set.target * M;
-    const pct = target ? Math.min(1, t.study / target) : null;
-    const sweep = pct == null ? 60 : pct * 360;
-    let cad = 0;
-    for (let i = 0; i < 7; i++) { const d = days[dayKey(now - i * 864e5)]; if (d && split(d).study > 0) cad++; }
-    keyed(box, Math.round(sweep / 2) + ':' + cad, b => {
-      b.innerHTML = cadenceSVG({ theme: 'light', sweep, id: 'ml', size: 30, ticks: false, bg: false }).replace('<svg ', '<svg class="ol" ') +
-                    cadenceSVG({ theme: 'dark', sweep, id: 'md', size: 30, ticks: false, bg: false }).replace('<svg ', '<svg class="od" ');
+    keyed(box, 'static', b => {
+      b.innerHTML = cadenceSVG({ theme: 'light', id: 'ml', size: 30, ticks: false, bg: false }).replace('<svg ', '<svg class="ol" ') +
+                    cadenceSVG({ theme: 'dark', id: 'md', size: 30, ticks: false, bg: false }).replace('<svg ', '<svg class="od" ');
     });
-    box.parentNode.title = (pct == null ? 'Hari ini ' + fmtDur(t.study) + ' belajar' : 'Hari ini ' + fmtDur(t.study) + ' dari ' + fmtDur(target) + ' (' + Math.round(pct * 100) + '%)') +
-      ' · Ritme 7 hari: ' + cad + '/7 hari belajar';
   }
+
+  /* ---------- Catatan hasil: apa yang dipahami, bukan berapa lama ----------
+     Satu catatan: { id, cat, kind, text, n (jumlah, opsional), min (menit, opsional), at, dev }.
+     S.drafts menyimpan menit dari timer per topik yang belum dicatat hasilnya. */
+  const ICON = p => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>';
+  const KINDS = [
+    { id: 'bab', name: 'Bab selesai', short: 'bab', icon: ICON('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>') },
+    { id: 'rangkuman', name: 'Rangkuman', short: 'rangkuman', icon: ICON('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>') },
+    { id: 'soal', name: 'Latihan soal', short: 'latihan soal', icon: ICON('<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>') },
+    { id: 'konsep', name: 'Paham konsep', short: 'konsep', icon: ICON('<path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/>') }
+  ];
+  const kindOf = id => KINDS.find(k => k.id === id) || KINDS[KINDS.length - 1];
+  const Catatan = {
+    add(o) {
+      const at = Date.now();
+      const num = (v, max) => { v = Math.round(+v); return v > 0 ? Math.min(max, v) : null; };
+      const x = { id: 'n' + at.toString(36) + Math.random().toString(36).slice(2, 6), cat: o.cat, kind: o.kind,
+        text: String(o.text || '').trim().slice(0, 140), n: num(o.n, 9999), min: num(o.min, 1440), at, dev: sync.device() };
+      S.notes.push(x);
+      S.logCat = o.cat;
+      delete S.drafts[o.cat];
+      save();
+      return x;
+    },
+    remove(id) { S.notes = S.notes.filter(x => x.id !== id); save(); },
+    onDay: k => S.notes.filter(x => dayKey(x.at) === k).sort((a, b) => b.at - a.at),
+    // Menit dari timer yang belum dicatat hasilnya (dibulatkan, minimal 1 menit)
+    draft: id => { const m = Math.round(S.drafts[id] || 0); return m >= 1 ? m : 0; },
+    addDraft(s) {
+      const k = Kategori.find(s.cat); if (!k || k.type !== 'study') return;
+      S.drafts[s.cat] = (S.drafts[s.cat] || 0) + (s.end - s.start) / M;
+      S.draftLast = s.cat; saveLocal();
+    },
+    dropDraft(id) { delete S.drafts[id]; if (S.draftLast === id) S.draftLast = null; saveLocal(); }
+  };
 
   function saveLocal() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} try { updateMark(); } catch (e) {} }
   function save() { saveLocal(); sync.changed(); }
@@ -830,9 +984,11 @@
 
   /* ---------- Elemen ---------- */
   const app = $('app'), timeEl = $('time'), statusEl = $('status'), toggleBtn = $('toggle'), resetBtn = $('reset');
-  const tabs = { timer: $('tabTimer'), cats: $('tabKat'), stats: $('tabSt') };
+  const tabs = { log: $('tabLog'), prog: $('tabProg'), timer: $('tabTimer'), stats: $('tabSt'), cats: $('tabKat') };
+  const VIEWS = { log: 'viewLog', prog: 'viewProg', timer: 'viewTimer', stats: 'viewStats', cats: 'viewCats' };
+  const HASH = { log: 'catat', prog: 'progres', timer: 'timer', stats: 'statistik', cats: 'pengaturan' };
   const modeBtns = { stopwatch: $('mSw'), countdown: $('mCd'), category: $('mBr') };
-  let view = 'timer';
+  let view = 'log';
   const cdIn = $('cdIn');
   const PRESETS = [15, 25, 45, 60, 90, 120];
 
@@ -867,8 +1023,8 @@
 
   // Tampilan mendengarkan Timer
   Timer.on((type, d) => {
-    if (type === 'saved') toast('✓ ' + savedText(d.session));
-    else if (type === 'switched') { if (d.session) toast('✓ ' + savedText(d.session) + ' · lanjut ' + d.to.name); }
+    if (type === 'saved') { toast('✓ ' + savedText(d.session)); Catatan.addDraft(d.session); }
+    else if (type === 'switched') { if (d.session) { toast('✓ ' + savedText(d.session) + ' · lanjut ' + d.to.name); Catatan.addDraft(d.session); } }
     else if (type === 'reset') { if (!d.hadRunning) toast('Kembali ke 0 · sesi sebelumnya tetap tersimpan'); }
     else if (type === 'started') play(timeEl, 'bump');
     else if (type === 'finished') { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); startBeepSpam(); }
@@ -915,6 +1071,9 @@
   }
 
   function render() {
+    navTimer();
+    if (view === 'log') return renderLog();
+    if (view === 'prog') return renderProg();
     if (view === 'stats') return renderStats();
     if (view === 'cats') return;
     Timer.tick();
@@ -986,6 +1145,154 @@
     const long = S.active && !S.active.ok && now - S.active.start > S.set.maxH * H;
     $('warn').hidden = !long;
     if (long) $('warnText').textContent = 'Sesi ' + cat(S.active.cat).name + ' sudah berjalan ' + fmtDur(now - S.active.start) + ' tanpa jeda. Masih berlangsung?';
+
+    // Sesi belajar selesai: tawarkan mencatat hasilnya, dengan topik dan menit terisi
+    const dc = S.draftLast, dm = dc ? Catatan.draft(dc) : 0, dk = dc ? Kategori.find(dc) : null;
+    const ask = !st.running && dm > 0 && !!dk;
+    $('logAsk').hidden = !ask;
+    if (ask) $('logAskText').textContent = dk.name + ' · ' + fmtDur(dm * M) + ' dari timer. Apa hasilnya?';
+  }
+
+  /* ---------- Catat: layar pertama ---------- */
+  let logKind = null, logFilled = null;
+  const logIn = { text: $('logText'), n: $('logN'), min: $('logMin') };
+  const studyCats = () => S.cats.filter(c => c.type === 'study');
+  function logCat() {
+    const l = studyCats();
+    const k = l.find(c => c.id === S.logCat) || l.find(c => c.id === S.sel) || l[0];
+    return k ? k.id : null;
+  }
+  // Menit diisi dari timer bila topik ini punya sesi yang belum dicatat hasilnya
+  function fillDraft(force) {
+    const id = logCat(); if (!id || (!force && logFilled === id)) return;
+    logFilled = id;
+    const m = Catatan.draft(id);
+    logIn.min.value = m ? String(m) : '';
+  }
+  function openLog(id) { if (id) S.logCat = id; setView('log'); }
+
+  function renderLog() {
+    const list = studyCats(), cur = logCat();
+    $('logNoCats').hidden = list.length > 0;
+    keyed($('logCats'), list.map(k => k.id + k.name + k.color).join('~') + '#' + cur, box => {
+      list.forEach(k => {
+        const on = k.id === cur;
+        const b = el('button', { className: 'chip' + (on ? ' on' : ''), type: 'button' }, [el('span', { className: 'dot' }), k.name]);
+        b.style.setProperty('--c', k.color);
+        b.setAttribute('aria-pressed', String(on));
+        b.onclick = () => { S.logCat = k.id; saveLocal(); fillDraft(true); renderLog(); };
+        box.appendChild(b);
+      });
+    });
+    keyed($('kinds'), 'k#' + logKind, box => {
+      KINDS.forEach(k => {
+        const b = el('button', { className: 'kind', type: 'button' });
+        b.innerHTML = k.icon; b.append(k.name);
+        b.setAttribute('aria-pressed', String(k.id === logKind));
+        b.onclick = () => { logKind = logKind === k.id ? null : k.id; renderLog(); };
+        box.appendChild(b);
+      });
+    });
+    $('logSave').disabled = !(cur && logKind);
+    $('logHint').textContent = !cur ? 'Tambahkan topik belajar dulu' : logKind ? '' : 'Pilih jenis hasil untuk menyimpan';
+    const dm = cur ? Catatan.draft(cur) : 0;
+    $('logFrom').hidden = !dm;
+    $('logFrom').textContent = dm ? 'Menit diisi dari timer: ' + fmtDur(dm * M) : '';
+    renderNotes($('logToday'), Catatan.onDay(dayKey(Date.now())), true, 'Belum ada catatan hari ini. Selesai belajar? Catat satu hal yang kamu pahami.');
+  }
+  $('logForm').onsubmit = e => {
+    e.preventDefault();
+    const cur = logCat(); if (!cur || !logKind) return;
+    const x = Catatan.add({ cat: cur, kind: logKind, text: logIn.text.value, n: logIn.n.value, min: logIn.min.value });
+    if (S.draftLast === cur) S.draftLast = null;
+    logKind = null; logFilled = null;
+    logIn.text.value = logIn.n.value = logIn.min.value = '';
+    toast('✓ Tercatat · ' + kindOf(x.kind).name + ' · ' + Kategori.find(cur).name);
+    renderLog();
+  };
+
+  const whenTxt = (at, withDay) => { const d = new Date(at + TZ); return (withDay ? HARI[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + BLN[d.getUTCMonth()] + ' · ' : '') + pad(d.getUTCHours()) + '.' + pad(d.getUTCMinutes()); };
+  const catKey = list => list.map(x => { const k = Kategori.find(x.cat); return k ? k.name + k.color + Kategori.isGone(x.cat) : '?'; }).join();
+  const noteKey = list => list.map(x => [x.id, x.cat, x.kind, x.text, x.n, x.min].join('|')).join('~');
+  // Satu baris catatan: jenis + kalimat, lalu topik/waktu/jumlah/menit, dan tombol hapus (ketuk dua kali)
+  function noteRow(x, showCat, withDay) {
+    const k = Kategori.find(x.cat), kd = kindOf(x.kind);
+    const meta = [];
+    if (showCat) meta.push(dotEl(k ? k.color : 'var(--faint)'), (k ? k.name : 'Topik dihapus') + (Kategori.isGone(x.cat) ? ' (dihapus)' : '') + ' · ');
+    meta.push(whenTxt(x.at, withDay) + (x.n ? ' · ' + x.n + ' ' + x.kind : '') + (x.min ? ' · ' + fmtDur(x.min * M) : ''));
+    const del = el('button', { className: 'x', type: 'button', textContent: '✕', title: 'Hapus catatan' });
+    del.setAttribute('aria-label', 'Hapus catatan');
+    del.onclick = () => {
+      if (!del.classList.contains('armed')) {
+        del.classList.add('armed'); del.textContent = 'Hapus';
+        setTimeout(() => { if (del.isConnected) { del.classList.remove('armed'); del.textContent = '✕'; } }, 2500);
+        return;
+      }
+      Catatan.remove(x.id); toast('Catatan dihapus'); render();
+    };
+    return el('div', { className: 'note' }, [
+      el('div', {}, [
+        el('div', { className: 'nt' }, [el('span', { className: 'kb', textContent: kd.name }), x.text ? el('span', { className: 'tx', textContent: x.text }) : null]),
+        el('div', { className: 'nm' }, meta)
+      ]),
+      del
+    ]);
+  }
+  function renderNotes(box, list, showCat, empty) {
+    keyed(box, noteKey(list) + '#' + catKey(list), b => {
+      if (!list.length) { b.appendChild(el('p', { className: 'empty', textContent: empty })); return; }
+      list.forEach(x => b.appendChild(noteRow(x, showCat)));
+    });
+  }
+
+  /* ---------- Progres: linimasa hasil per topik, tanpa jam dan target ---------- */
+  const progOpen = new Set();
+  function renderProg() {
+    const today = dayKey(Date.now()), wk = monday(today);
+    const week = S.notes.filter(x => dayKey(x.at) >= wk);
+    const cnt = KINDS.map(k => [k, week.filter(x => x.kind === k.id).length]).filter(a => a[1]);
+    keyed($('progSum'), cnt.map(a => a[0].id + a[1]).join() + '#' + wk, b => {
+      b.appendChild(el('span', { textContent: cnt.length ? 'Minggu ini' : 'Minggu ini belum ada hasil' }));
+      cnt.forEach(([k, n]) => b.appendChild(el('span', { className: 'sk' }, [el('b', { textContent: String(n) }), k.name])));
+    });
+    const by = {};
+    S.notes.forEach(x => (by[x.cat] || (by[x.cat] = [])).push(x));
+    const ids = Object.keys(by);
+    ids.forEach(id => by[id].sort((a, b) => b.at - a.at));
+    ids.sort((a, b) => by[b][0].at - by[a][0].at);
+    const key = ids.map(id => id + (progOpen.has(id) ? '+' : '') + ':' + noteKey(by[id])).join('#') + '#' + catKey(ids.map(id => ({ cat: id }))) + '#' + wk;
+    keyed($('progTopics'), key, box => {
+      if (!ids.length) { box.appendChild(el('div', { className: 'card' }, [el('p', { className: 'empty', textContent: 'Belum ada catatan hasil. Setelah belajar, catat satu hal yang kamu pahami di layar Catat.' })])); return; }
+      ids.forEach(id => {
+        const k = Kategori.find(id), list = by[id], wn = list.filter(x => dayKey(x.at) >= wk).length;
+        const open = progOpen.has(id), shown = open ? list : list.slice(0, 5);
+        const card = el('div', { className: 'card tcard' }, [
+          el('h3', {}, [dotEl(k ? k.color : 'var(--faint)'), k ? k.name : 'Topik dihapus', Kategori.isGone(id) ? el('span', { className: 'tag', textContent: 'dihapus' }) : null]),
+          el('p', { className: 'tsub', textContent: list.length + ' hasil' + (wn ? ' · ' + wn + ' minggu ini' : '') }),
+          el('div', { className: 'notes' }, shown.map(x => noteRow(x, false, true)))
+        ]);
+        if (list.length > 5) {
+          const m = el('button', { type: 'button', textContent: open ? 'Ringkas' : 'Lihat semua (' + list.length + ')' });
+          m.onclick = () => { if (open) progOpen.delete(id); else progOpen.add(id); renderProg(); };
+          card.appendChild(el('div', { className: 'more' }, [m]));
+        }
+        box.appendChild(card);
+      });
+    });
+  }
+
+  // Tombol timer di navigasi: menampilkan waktu berjalan saat berada di layar lain
+  function navTimer() {
+    const b = tabs.timer, sp = $('navTime'), st = Timer.state();
+    let txt = '';
+    if (st.running) txt = st.mode === 'countdown' ? fmtFlex(st.cdLimit - st.elapsed) : fmtFlex(st.mode === 'category' ? Date.now() - S.active.start : st.elapsed);
+    else if (st.finished) txt = 'Selesai';
+    if (sp.textContent !== txt) sp.textContent = txt;
+    b.classList.toggle('live', !!txt);
+    b.classList.toggle('done', !!st.finished && !st.running);
+    const lbl = st.running ? 'Timer berjalan' : st.finished ? 'Timer selesai' : 'Timer';
+    if (b.getAttribute('aria-label') !== lbl) b.setAttribute('aria-label', lbl);
+    if (view !== 'timer') document.title = st.running ? txt + ' · ' + ((Kategori.find(S.active.cat) || {}).name || '') : DEF_TITLE;
   }
 
   // Kartu Hari ini: total, bar bertumpuk per topik, dan baris per kategori dengan ▶
@@ -1076,7 +1383,7 @@
   // Tombol dikirim langsung. Jangan pakai document.activeElement: di Safari iPhone tombol tidak
   // mendapat fokus saat diketuk, sehingga yang terambil adalah <body> dan seluruh halaman terhapus.
   function confirmDel(k, b) {
-    const n = S.sessions.filter(s => s.cat === k.id).length;
+    const n = S.sessions.filter(s => s.cat === k.id).length + S.notes.filter(x => x.cat === k.id).length;
     if (!n) return true;
     if (b.dataset.armed === k.id) return true;
     b.dataset.armed = k.id; b.textContent = 'Yakin?';
@@ -1359,6 +1666,9 @@
   const rowS = s => ({ id: s.id, cat_id: s.cat, started_at: iso(s.start), ended_at: iso(s.end), device: s.dev || DEV });
   const rowC = (c, i) => ({ id: c.id, name: (c.name || '?').slice(0, 24), color: c.color, type: c.type, limit_min: Math.min(1440, c.limit || 0), countdown: !!c.cd, sort: i });
   const rowSet = () => ({ target_min: S.set.target, day_start_hour: S.set.dayStart, max_session_h: S.set.maxH });
+  const rowN = x => ({ id: x.id, cat_id: x.cat, kind: x.kind, body: x.text || '', qty: x.n == null ? null : x.n, minutes: x.min == null ? null : x.min, noted_at: iso(x.at), device: x.dev || DEV });
+  // Tabel notes belum dibuat di Supabase: catatan tetap tersimpan di perangkat, sinkron dilewati
+  const missingTable = e => /PGRST205|42P01|schema cache|does not exist/i.test(String((e && e.code) || '') + ' ' + String((e && e.message) || ''));
   const timeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('Waktu habis menghubungi server')), ms))]);
   const must = r => { if (r && r.error) throw r.error; return r ? r.data : null; };
 
@@ -1500,11 +1810,44 @@
     for (let i = 0; i < sDel.length; i += 200) must(await sb.from('sessions').update({ deleted: true }).in('id', sDel.slice(i, i + 200)));
     sDel.forEach(id => delete H_.s[id]);
 
-    S.sync.pull = { settings: ps.max, categories: pc.max, sessions: pz.max };
+    S.sync.pull = Object.assign(S.sync.pull || {}, { settings: ps.max, categories: pc.max, sessions: pz.max });
+    await syncNotes(uid, H_);
     S.sync.done = true;
 
     // 3) Timer aktif
     await reconcileActive();
+  }
+
+  // Catatan hasil: tarik lalu kirim, sama seperti sesi (hapus lunak, hash per baris)
+  async function syncNotes(uid, H_) {
+    if (!H_.n) H_.n = {};
+    let pn;
+    try { pn = await pullTable('notes'); }
+    catch (e) { if (missingTable(e)) { Sync.noNotes = true; return; } throw e; }
+    Sync.noNotes = false;
+    const nmap = new Map(S.notes.map((x, i) => [x.id, i]));
+    const drop = new Set();
+    pn.data.forEach(r => {
+      const i = nmap.has(r.id) ? nmap.get(r.id) : -1;
+      const loc = i >= 0 ? S.notes[i] : null;
+      if (loc && H_.n[r.id] !== hsh(rowN(loc))) return;
+      if (!loc && H_.n[r.id] != null && !r.deleted) return;
+      if (r.deleted) { if (loc) drop.add(r.id); delete H_.n[r.id]; return; }
+      const nl = { id: r.id, cat: r.cat_id, kind: r.kind, text: r.body || '', n: r.qty == null ? null : r.qty, min: r.minutes == null ? null : r.minutes, at: parseTs(r.noted_at), dev: r.device };
+      if (loc) S.notes[i] = nl; else { S.notes.push(nl); nmap.set(r.id, S.notes.length - 1); }
+      H_.n[r.id] = hsh(rowN(nl));
+    });
+    if (drop.size) S.notes = S.notes.filter(x => !drop.has(x.id));
+
+    const nUp = [], nH = {};
+    S.notes.forEach(x => { if (!x.dev) x.dev = DEV; const r = rowN(x), h = hsh(r); if (H_.n[x.id] !== h) { nUp.push(Object.assign({ user_id: uid, deleted: false }, r)); nH[x.id] = h; } });
+    for (let i = 0; i < nUp.length; i += 500) must(await sb.from('notes').upsert(nUp.slice(i, i + 500), { onConflict: 'user_id,id' }));
+    Object.assign(H_.n, nH);
+    const live = new Set(S.notes.map(x => x.id));
+    const nDel = Object.keys(H_.n).filter(id => !live.has(id));
+    for (let i = 0; i < nDel.length; i += 200) must(await sb.from('notes').update({ deleted: true }).in('id', nDel.slice(i, i + 200)));
+    nDel.forEach(id => delete H_.n[id]);
+    S.sync.pull.notes = pn.max;
   }
 
   /* ---------- Satu timer aktif ---------- */
@@ -1648,6 +1991,8 @@
     if (S.sync.uid) {
       const last = S.sync.last ? new Date(S.sync.last + TZ) : null;
       const pending = S.sessions.filter(s => S.sync.h.s[s.id] !== hsh(rowS(s))).length;
+      const hn = S.sync.h.n || {};
+      const pendingN = S.notes.filter(x => hn[x.id] !== hsh(rowN(x))).length;
       const status = { busy: 'Sedang menyinkron…', ok: 'Tersinkron', off: 'Offline: perubahan disimpan di perangkat ini dan dikirim saat online', err: 'Sinkron gagal: ' + Sync.err, none: 'Siap' }[Sync.state];
       const now = el('button', { className: 'pill primary', textContent: 'Sinkronkan' });
       now.onclick = () => syncNow();
@@ -1659,9 +2004,11 @@
         el('div', { className: 'rows' }, [
           el('div', { className: 'row' }, [el('span', { textContent: 'Status' }), el('b', { textContent: status })]),
           el('div', { className: 'row' }, [el('span', { textContent: 'Terakhir sinkron' }), el('b', { textContent: last ? pad(last.getUTCHours()) + '.' + pad(last.getUTCMinutes()) : '—' })]),
+          el('div', { className: 'row' }, [el('span', { textContent: 'Catatan menunggu dikirim' }), el('b', { textContent: Sync.noNotes ? 'Tabel notes belum ada' : String(pendingN) })]),
           el('div', { className: 'row' }, [el('span', { textContent: 'Sesi menunggu dikirim' }), el('b', { textContent: String(pending) })]),
           el('div', { className: 'row' }, [el('span', { textContent: 'Perangkat ini' }), el('b', { textContent: DEV })])
         ]),
+        Sync.noNotes ? el('p', { className: 'hint', textContent: 'Catatan hasil tetap tersimpan di perangkat ini. Agar tersinkron, jalankan supabase/notes.sql sekali di SQL Editor Supabase.' }) : null,
         note,
         el('div', { className: 'controls dctl' }, [now, out])
       );
@@ -1737,16 +2084,17 @@
   /* ---------- Mode dan event ---------- */
   // Halaman (tab atas): tidak mengganggu timer yang sedang berjalan
   function setView(next) {
+    if (!VIEWS[next]) next = 'log';
     view = next;
-    for (const m in tabs) tabs[m].setAttribute(m === 'cats' ? 'aria-pressed' : 'aria-selected', String(m === next));
-    $('viewTimer').hidden = next !== 'timer';
-    $('viewStats').hidden = next !== 'stats';
-    $('viewCats').hidden = next !== 'cats';
-    if (next === 'stats') { if (!running()) document.title = DEF_TITLE; anim = true; }
+    for (const m in tabs) tabs[m].setAttribute(m === 'log' || m === 'prog' ? 'aria-selected' : 'aria-pressed', String(m === next));
+    for (const m in VIEWS) $(VIEWS[m]).hidden = m !== next;
+    if (next === 'stats') anim = true;
     if (next === 'cats') renderSet();
+    if (next === 'log') fillDraft(true);
     invalidate($('chips'));
+    try { history.replaceState(null, '', '#' + HASH[next]); } catch (e) {}
     render();
-    play($('view' + (next === 'timer' ? 'Timer' : next === 'stats' ? 'Stats' : 'Cats')), 'enter');
+    play($(VIEWS[next]), 'enter');
   }
   // Mode timer: Stopwatch / Countdown / Break (terkunci saat timer berjalan)
   function setMode(next) { stopBeepSpam(); Timer.setMode(next); Timer.setCountdown(Math.max(1, parseMin(cdIn.value))); }
@@ -1755,10 +2103,17 @@
   resetBtn.onclick = reset;
   $('warnKeep').onclick = () => Timer.confirmLong();
   $('warnCut').onclick = () => { if (S.active) Timer.cut(S.active.start + S.set.maxH * H); };
+  tabs.log.onclick = () => setView('log');
+  tabs.prog.onclick = () => setView('prog');
   tabs.timer.onclick = () => setView('timer');
   tabs.cats.onclick = () => setView('cats');
   tabs.stats.onclick = () => setView('stats');
   $('toSet').onclick = () => setView('cats');
+  $('logToSet').onclick = () => setView('cats');
+  $('toStats').onclick = () => setView('stats');
+  $('logAskGo').onclick = act(() => openLog(S.draftLast));
+  $('logAskLater').onclick = act(() => { Catatan.dropDraft(S.draftLast); render(); });
+  window.addEventListener('hashchange', () => { const v = Object.keys(HASH).find(k => HASH[k] === location.hash.slice(1)); if (v && v !== view) setView(v); });
   // Pintasan keyboard: Spasi = mulai/jeda, R = kembali ke 0 (hanya di layar Timer, tidak saat mengetik)
   document.addEventListener('keydown', e => {
     if (view !== 'timer' || e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
@@ -1784,20 +2139,24 @@
   window.addEventListener('pagehide', saveLocal);
 
   // Sesi yang masih aktif dari kunjungan sebelumnya dilanjutkan (waktu tetap dihitung).
-  let lastStatsDay = dayKey(Date.now()), lastStatsAt = 0;
+  let lastStatsDay = dayKey(Date.now()), lastStatsAt = 0, lastLogDay = dayKey(Date.now());
   setInterval(() => {
-    if (view === 'cats') { if (running()) document.title = fmtHMS(Date.now() - S.active.start) + ' · ' + ((cat(S.active.cat) || {}).name || ''); return; }
-    if (view !== 'stats') render();
-    else if ((S.active && Date.now() - lastStatsAt > 5000) || dayKey(Date.now()) !== lastStatsDay) { lastStatsAt = Date.now(); lastStatsDay = dayKey(Date.now()); if ((!document.activeElement || !document.activeElement.closest('.hist, details')) && !document.querySelector('#viewStats .qp:hover, #viewStats .x:hover, #viewStats .more button:hover')) renderStats(); }
+    Timer.tick();                          // Countdown tetap selesai tepat waktu walau layar lain terbuka
+    if (view === 'timer') return render();
+    navTimer();
+    if (view === 'log' || view === 'prog') { if (dayKey(Date.now()) !== lastLogDay) { lastLogDay = dayKey(Date.now()); render(); } }
+    else if (view === 'stats' && ((S.active && Date.now() - lastStatsAt > 5000) || dayKey(Date.now()) !== lastStatsDay)) { lastStatsAt = Date.now(); lastStatsDay = dayKey(Date.now()); if ((!document.activeElement || !document.activeElement.closest('.hist, details')) && !document.querySelector('#viewStats .qp:hover, #viewStats .x:hover, #viewStats .more button:hover')) renderStats(); }
   }, 250);
 
   renderSet();
   // Sesi aktif dari kunjungan sebelumnya dilanjutkan di mode yang sesuai jenis kategorinya
   setMode(S.active && Kategori.group(cat(S.active.cat)) === 'rest' ? 'category' : 'stopwatch');
-  setView('timer');
+  // Layar awal: dari alamat (#timer, #progres, ...), timer yang masih berjalan, atau Catat
+  const fromHash = Object.keys(HASH).find(k => HASH[k] === location.hash.slice(1));
+  setView(fromHash || (S.active ? 'timer' : 'log'));
   // Permukaan uji: interface module inti, hanya dibaca dan dipanggil oleh tests/
-  window.StudyO = Object.freeze({ Timer, Kategori, Hari: Object.freeze({ dayKey, perDay, split }), setSync: a => { sync = Object.assign({}, OFFLINE, a); } });
-  updateMark(); setInterval(() => updateMark(), 60000);
+  window.StudyO = Object.freeze({ Timer, Kategori, Catatan, Hari: Object.freeze({ dayKey, perDay, split }), setSync: a => { sync = Object.assign({}, OFFLINE, a); } });
+  updateMark();
 })();
 </script>
 </body>

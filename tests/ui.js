@@ -1,11 +1,11 @@
-const {APP,MOCK,shot}=require('./_app');
+const {TIMER:APP,MOCK,shot}=require('./_app');
 const {chromium,devices}=require('playwright');const fs=require('fs');
 const ok=(c,m)=>console.log((c?'PASS ':'FAIL ')+m);
 (async()=>{const b=await chromium.launch();
 const c=await b.newContext(devices['iPhone 13']);await c.exposeFunction('mockDb',s=>JSON.stringify({data:[],error:null}));
 await c.route(/cdn\.jsdelivr\.net/, r=>r.fulfill({contentType:'application/javascript',body:MOCK}));
 const p=await c.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));await p.goto(APP);await p.waitForTimeout(400);
-const tabsTxt=await p.locator('.tabs button').allTextContents(); ok(tabsTxt.join()==='Timer,Statistik' && await p.isVisible('#tabKat[aria-label="Pengaturan"]'),'tab atas: '+tabsTxt.join(', ')+' + ikon Pengaturan');
+const tabsTxt=await p.locator('.tabs button').allTextContents(); ok(tabsTxt.join()==='Catat,Progres' && await p.isVisible('#tabTimer') && await p.isVisible('#tabSt') && await p.isVisible('#tabKat[aria-label="Pengaturan"]'),'tab atas: '+tabsTxt.join(', ')+' + ikon Timer, Statistik, Pengaturan');
 ok((await p.locator('.modes button').allTextContents()).join()==='Stopwatch,Countdown,Break','mode: Stopwatch, Countdown, Break');
 ok((await p.locator('#chips .chip:not(.manage)').allTextContents()).join()==='Matematika,Python','Stopwatch: hanya kategori belajar');
 await p.click('#mBr'); ok((await p.locator('#chips .chip:not(.manage)').allTextContents()).join()==='Main,Istirahat','Break: hanya kategori istirahat');
